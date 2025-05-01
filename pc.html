@@ -1,0 +1,4178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>英语单词跑酷游戏</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            background-color: #1e3a8a; /* 深蓝色固定背景 */
+        }
+        #gameCanvas {
+            display: block;
+            margin: 0 auto;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+        }
+        #gameContainer {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        #controls {
+            position: absolute;
+            bottom: 80px;
+            left: 20px;
+            z-index: 10;
+            display: none;
+        }
+        #joystick {
+            width: 150px;
+            height: 150px;
+            background-color: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            position: relative;
+        }
+        #joystickKnob {
+            width: 50px;
+            height: 50px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        #jumpButton {
+            position: absolute;
+            bottom: 80px;
+            right: 30px;
+            width: 80px;
+            height: 80px;
+            background-color: rgba(255, 0, 0, 0.5);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: white;
+            z-index: 10;
+            display: none;
+        }
+        #startScreen {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            text-align: center;
+        }
+        #startScreen h1 {
+            color: white;
+            font-size: 48px;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            text-align: center;
+        }
+        #startScreen p {
+            color: white;
+            margin-bottom: 20px;
+            font-size: 18px;
+            text-align: center;
+            width: 100%;
+        }
+        .button {
+            padding: 15px 30px;
+            background-color: #22c55e;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            margin: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        .button:hover {
+            background-color: #16a34a;
+            transform: translateY(-2px);
+        }
+        .button:active {
+            transform: translateY(1px);
+        }
+        #fileInput {
+            display: none;
+        }
+        #characterSelect {
+            margin-top: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 500px;
+        }
+        #characterSelect p {
+            text-align: center;
+            width: 100%;
+        }
+        .characterOption {
+            display: flex;
+            margin: 15px;
+            justify-content: center;
+            width: 100%;
+        }
+        .characterButton {
+            width: 80px;
+            height: 100px;
+            margin: 0 15px;
+            cursor: pointer;
+            border: 3px solid transparent;
+            padding: 10px;
+            border-radius: 10px;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .characterButton p {
+            margin-top: 5px;
+            margin-bottom: 0;
+            text-align: center;
+            width: 100%;
+        }
+        .characterButton:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        .characterButton.selected {
+            border-color: #f59e0b;
+            background-color: rgba(245, 158, 11, 0.3);
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+        }
+        #volumeIcon {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.8);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 20;
+            display: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease;
+        }
+        #volumeIcon:hover {
+            transform: scale(1.1);
+        }
+        #hintButton {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.8);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 20;
+            display: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease;
+        }
+        #hintButton:hover {
+            transform: scale(1.1);
+        }
+        #pauseButton {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 20;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease;
+        }
+        #pauseButton:hover {
+            transform: scale(1.1);
+        }
+        #studyModeToggle {
+            position: absolute;
+            top: 20px;
+            right: 70px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 5px 10px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 20;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            font-size: 14px;
+            font-weight: bold;
+        }
+        #studyModeToggle.active {
+            background-color: #22c55e;
+            color: white;
+        }
+        #pauseMenu {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.9) 0%, rgba(59, 130, 246, 0.9) 100%);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 110;
+        }
+        #pauseMenu h2 {
+            color: white;
+            font-size: 36px;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            width: 100%;
+        }
+        #progressBar {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 200px;
+            height: 20px;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        #progressFill {
+            height: 100%;
+            background-color: #22c55e;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        #score {
+            position: absolute;
+            top: 50px;
+            left: 20px;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        #loading {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.95) 0%, rgba(59, 130, 246, 0.95) 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 120;
+            color: white;
+        }
+        #loading h2 {
+            font-size: 30px;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+        #loadingBar {
+            width: 300px;
+            height: 30px;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            margin-top: 20px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        #loadingFill {
+            height: 100%;
+            width: 0%;
+            background-color: #22c55e;
+            transition: width 0.3s;
+        }
+        #wordArchive {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            display: none;
+            padding: 15px;
+            height: 180px;
+            z-index: 20;
+        }
+        #wordArchiveTitle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        #wordArchiveTitle h3 {
+            margin: 0;
+        }
+        #exportButton {
+            background-color: #22c55e;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #archivedWordsList {
+            max-height: 120px;
+            overflow-y: auto;
+            padding: 5px;
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+        }
+        .archiveWord {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            padding: 5px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+        }
+        .archiveWord div {
+            margin-right: 10px;
+            flex: 1;
+        }
+        .hintCount {
+            flex: 0 0 80px !important;
+            text-align: center;
+        }
+        .season-button {
+            position: absolute;
+            top: 20px;
+            right: 180px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 5px 10px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 20;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            font-size: 14px;
+            font-weight: bold;
+        }
+        #hintedWordsButton {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 8px 15px;
+            border-radius: 8px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 20;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            font-size: 14px;
+            font-weight: bold;
+        }
+        #hintedWordsButton.active {
+            background-color: #22c55e;
+            color: white;
+        }
+        #rainbow {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+            opacity: 0;
+            transition: opacity 3s;
+        }
+        
+        /* 移动设备适配优化 */
+        @media (max-width: 768px) {
+            #pauseButton, #studyModeToggle, .season-button {
+                width: 36px;
+                height: 36px;
+                padding: 3px 8px;
+                font-size: 12px;
+            }
+            
+            #progressBar {
+                width: 140px;
+            }
+            
+            #score {
+                font-size: 14px;
+            }
+            
+            .characterOption {
+                flex-wrap: wrap;
+            }
+            
+            #controls {
+                bottom: 100px;
+            }
+            
+            #jumpButton {
+                bottom: 100px;
+                right: 20px;
+            }
+            
+            #hintedWordsButton {
+                font-size: 12px;
+                padding: 6px 12px;
+            }
+        }
+        
+        /* 针对横屏模式优化 */
+        @media (max-height: 500px) and (orientation: landscape) {
+            #pauseButton, #studyModeToggle, .season-button {
+                top: 10px;
+            }
+            
+            #progressBar {
+                top: 10px;
+                height: 15px;
+            }
+            
+            #score {
+                top: 30px;
+            }
+            
+            #controls {
+                bottom: 20px;
+                transform: scale(0.7);
+                transform-origin: bottom left;
+            }
+            
+            #jumpButton {
+                bottom: 20px;
+                right: 20px;
+                transform: scale(0.7);
+                transform-origin: bottom right;
+            }
+            
+            #hintedWordsButton {
+                bottom: 10px;
+            }
+            
+            #wordArchive {
+                height: 120px;
+            }
+            
+            #archivedWordsList {
+                max-height: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <canvas id="gameCanvas"></canvas>
+        
+        <div id="controls">
+            <div id="joystick">
+                <div id="joystickKnob"></div>
+            </div>
+        </div>
+        
+        <div id="jumpButton">跳跃</div>
+        
+        <div id="volumeIcon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M11 5L6 9H2V15H6L11 19V5Z" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M15.54 8.46C16.4774 9.39764 17.004 10.6692 17.004 12C17.004 13.3308 16.4774 14.6024 15.54 15.54" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M19.07 4.93C20.9447 6.80528 21.9979 9.34836 21.9979 12C21.9979 14.6516 20.9447 17.1947 19.07 19.07" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </div>
+        
+        <div id="hintButton">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="10" stroke="black" stroke-width="2"/>
+                <path d="M12 7V14" stroke="black" stroke-width="2" stroke-linecap="round"/>
+                <circle cx="12" cy="17" r="1" fill="black"/>
+            </svg>
+        </div>
+        
+        <div id="pauseButton">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="6" y="4" width="4" height="16" rx="1" fill="black"/>
+                <rect x="14" y="4" width="4" height="16" rx="1" fill="black"/>
+            </svg>
+        </div>
+        
+        <div id="studyModeToggle">
+            背诵模式：关
+        </div>
+        
+        <div class="season-button" id="seasonToggle">
+            四季：春季
+        </div>
+        
+        <div id="progressBar">
+            <div id="progressFill"></div>
+        </div>
+        
+        <div id="score">单词: 0 / 0</div>
+        
+        <div id="startScreen">
+            <h1>单词跑酷</h1>
+            <p>导入单词表开始游戏并选择角色</p>
+            <p>表格示例：1️⃣英文 2️⃣中文 3️⃣词性</p>
+            <label for="fileInput" class="button">导入单词表 (Excel/CSV)</label>
+            <input type="file" id="fileInput" accept=".csv,.xlsx,.xls">
+            
+            <div id="characterSelect">
+                <p style="color: white; margin-bottom: 15px; font-size: 20px;">选择角色:</p>
+                <div class="characterOption">
+                    <div class="characterButton selected" data-character="stickman">
+                        <svg width="60" height="80" viewBox="0 0 50 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="25" cy="10" r="8" stroke="white" stroke-width="3"/>
+                            <line x1="25" y1="18" x2="25" y2="40" stroke="white" stroke-width="3"/>
+                            <line x1="25" y1="40" x2="15" y2="60" stroke="white" stroke-width="3"/>
+                            <line x1="25" y1="40" x2="35" y2="60" stroke="white" stroke-width="3"/>
+                            <line x1="25" y1="30" x2="10" y2="20" stroke="white" stroke-width="3"/>
+                            <line x1="25" y1="30" x2="40" y2="20" stroke="white" stroke-width="3"/>
+                        </svg>
+                        <p>火柴人</p>
+                    </div>
+                    <div class="characterButton" data-character="ninja">
+                        <svg width="60" height="80" viewBox="0 0 50 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="25" cy="10" r="8" stroke="#4CAF50" stroke-width="3"/>
+                            <line x1="25" y1="18" x2="25" y2="40" stroke="#4CAF50" stroke-width="3"/>
+                            <line x1="25" y1="40" x2="15" y2="60" stroke="#4CAF50" stroke-width="3"/>
+                            <line x1="25" y1="40" x2="35" y2="60" stroke="#4CAF50" stroke-width="3"/>
+                            <line x1="25" y1="30" x2="10" y2="20" stroke="#4CAF50" stroke-width="3"/>
+                            <line x1="25" y1="30" x2="40" y2="20" stroke="#4CAF50" stroke-width="3"/>
+                            <path d="M15 10 H35" stroke="#4CAF50" stroke-width="3"/>
+                        </svg>
+                        <p>忍者</p>
+                    </div>
+                    <div class="characterButton" data-character="robot">
+                        <svg width="60" height="80" viewBox="0 0 50 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="15" y="5" width="20" height="15" rx="2" stroke="#f472b6" stroke-width="3"/>
+                            <rect x="10" y="20" width="30" height="25" rx="2" stroke="#f472b6" stroke-width="3"/>
+                            <line x1="20" y1="45" x2="20" y2="65" stroke="#f472b6" stroke-width="3"/>
+                            <line x1="30" y1="45" x2="30" y2="65" stroke="#f472b6" stroke-width="3"/>
+                            <circle cx="20" cy="12" r="3" fill="#f472b6"/>
+                            <circle cx="30" cy="12" r="3" fill="#f472b6"/>
+                            <line x1="18" y1="30" x2="32" y2="30" stroke="#f472b6" stroke-width="3"/>
+                        </svg>
+                        <p>机器人</p>
+                    </div>
+                </div>
+            </div>
+            
+            <button id="startButton" class="button">开始游戏</button>
+        </div>
+        
+        <div id="pauseMenu">
+            <h2>游戏暂停</h2>
+            <button id="resumeButton" class="button">继续游戏</button>
+            <button id="restartButton" class="button">重新开始</button>
+            <button id="returnButton" class="button">返回主界面</button>
+        </div>
+        
+        <div id="loading">
+            <h2>加载中...</h2>
+            <div id="loadingBar">
+                <div id="loadingFill"></div>
+            </div>
+        </div>
+        
+        <div id="wordArchive">
+            <div id="wordArchiveTitle">
+                <h3>已提示单词</h3>
+                <button id="exportButton">导出Excel</button>
+            </div>
+            <div id="archivedWordsList">
+                <!-- 这里将通过JavaScript动态添加提示过的单词 -->
+            </div>
+        </div>
+        
+        <div id="hintedWordsButton">已提示单词</div>
+        
+        <div id="rainbow"></div>
+    </div>
+
+    <!-- 使用Papa Parse处理CSV文件 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <!-- 使用SheetJS处理Excel文件 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        // 游戏主要变量
+        let canvas, ctx;
+        let gameWidth, gameHeight;
+        let gameRunning = false;
+        let gameStarted = false;
+        let gamePaused = false;
+        let isMobile = false;
+        let wordList = []; // 导入的单词列表
+        let currentWordIndex = 0; // 当前最远的进度
+        let visibleWordIndex = 0; // 当前看到的单词索引（可能回退）
+        let score = 0; // 得分
+        
+        // 背诵模式变量
+        let studyMode = false;
+        let hintedWords = []; // 提示过的单词列表
+        let wordArchiveVisible = false; // 控制单词档案是否可见
+        
+        // 季节和天气变量
+        let currentSeason = 'spring'; // spring, summer, autumn, winter
+        let seasonTransition = 0; // 季节过渡进度 0-1
+        let nextSeason = 'spring';
+        let seasonChangeStarted = false;
+        
+        // 跳板变量
+        let jumpboards = [];
+        
+        // 角色选择
+        let selectedCharacter = 'stickman';
+        
+        // 玩家变量
+        const player = {
+            x: 100,
+            y: 0,
+            width: 40,  // 增加宽度
+            height: 70, // 增加高度
+            speed: 5,
+            jumpForce: 15,
+            velY: 0,
+            isJumping: false,
+            isMovingLeft: false,
+            isMovingRight: false,
+            frame: 0,
+            frameCount: 0,
+            color: 'white',
+            outlineColor: 'black', // 添加轮廓颜色
+            outlineWidth: 4        // 轮廓粗细
+        };
+        
+        // 控制变量
+        let keys = {};
+        let joystickActive = false;
+        let joystickAngle = 0;
+        let joystickDistance = 0;
+        
+        // 游戏对象
+        const gameObjects = [];
+        const platforms = [];
+        let activeVolumeIcon = null;
+        let activeHintButton = null;
+        
+        // 游戏背景
+        const backgrounds = [];
+        
+        // 游戏时间和动画
+        let lastTime = 0;
+        let gameTime = 0;
+        let animationId;
+        
+        // 游戏相机
+        const camera = {
+            x: 0,
+            y: 0,
+            width: 0,
+            height: 0,
+            leftEdge: function() { return this.x + (this.width * 0.25); },
+            rightEdge: function() { return this.x + (this.width * 0.75); },
+            topEdge: function() { return this.y + (this.height * 0.25); },
+            bottomEdge: function() { return this.y + (this.height * 0.75); }
+        };
+        
+        // 季节颜色配置
+        const seasonColors = {
+            spring: {
+                skyTop: '#87CEEB', // 天蓝色
+                skyBottom: '#E0F7FA', // 淡蓝色
+                ground: '#4CAF50', // 绿色
+                trees: '#8BC34A', // 浅绿色
+                flowers: ['#FF4081', '#E91E63', '#9C27B0', '#FFEB3B'] // 粉红、紫色等春花颜色
+            },
+            summer: {
+                skyTop: '#1976D2', // 深蓝色
+                skyBottom: '#42A5F5', // 亮蓝色
+                ground: '#388E3C', // 深绿色
+                trees: '#43A047', // 中绿色
+                flowers: ['#F44336', '#FF9800', '#FFEB3B', '#4CAF50'] // 红、橙、黄等夏季颜色
+            },
+            autumn: {
+                skyTop: '#5D4037', // 棕色
+                skyBottom: '#8D6E63', // 浅棕色
+                ground: '#795548', // 棕色
+                trees: '#FF9800', // 橙色
+                flowers: ['#FF5722', '#FF9800', '#FFC107', '#795548'] // 橙、黄、棕等秋季颜色
+            },
+            winter: {
+                skyTop: '#546E7A', // 深灰蓝色
+                skyBottom: '#78909C', // 浅灰蓝色
+                ground: '#ECEFF1', // 浅灰色（雪）
+                trees: '#B0BEC5', // 灰色
+                flowers: ['#B3E5FC', '#E1F5FE', '#FFFFFF', '#CFD8DC'] // 浅蓝、白色等冬季颜色
+            }
+        };
+        
+        // 天气效果变量
+        const weatherEffects = {
+            lightning: {
+                active: false,
+                lastFlash: 0,
+                nextFlash: 0,
+                opacity: 0
+            },
+            sandstorm: {
+                active: false,
+                particles: [],
+                intensity: 0
+            },
+            rainbow: {
+                active: false,
+                opacity: 0
+            }
+        };
+        
+        // 游戏初始化
+        function initGame() {
+            canvas = document.getElementById('gameCanvas');
+            ctx = canvas.getContext('2d');
+            
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            
+            isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            
+            if (isMobile) {
+                document.getElementById('controls').style.display = 'block';
+                document.getElementById('jumpButton').style.display = 'flex';
+                setupJoystick();
+                setupJumpButton();
+            } else {
+                setupKeyboardControls();
+            }
+            
+            setupCharacterSelection();
+            setupFileInput();
+            setupStartButton();
+            setupPauseButton();
+            setupStudyModeToggle();
+            setupSeasonToggle();
+            setupWordArchive();
+            setupHintedWordsButton();
+            setupRainbowElement();
+            
+            // 初始加载
+            document.getElementById('loading').style.display = 'flex';
+            let loadingProgress = 0;
+            const loadingInterval = setInterval(() => {
+                loadingProgress += 10;
+                document.getElementById('loadingFill').style.width = loadingProgress + '%';
+                if (loadingProgress >= 100) {
+                    clearInterval(loadingInterval);
+                    setTimeout(() => {
+                        document.getElementById('loading').style.display = 'none';
+                    }, 500);
+                }
+            }, 200);
+        }
+        
+        // 设置彩虹元素
+        function setupRainbowElement() {
+            const rainbow = document.getElementById('rainbow');
+            rainbow.innerHTML = generateRainbowSVG();
+        }
+        
+        // 生成彩虹SVG
+        function generateRainbowSVG() {
+            const colors = ['#FF0000', '#FF7F00', '#FFFF00', '#00FF00', '#0000FF', '#4B0082', '#9400D3'];
+            let svg = '<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">';
+            
+            for (let i = 0; i < colors.length; i++) {
+                const radius = 500 + i * 20;
+                svg += `<path d="M-100,${gameHeight} a${radius},${radius} 0 0,1 ${gameWidth + 200},0" 
+                       fill="none" stroke="${colors[i]}" stroke-width="10" stroke-opacity="0.6" />`;
+            }
+            
+            svg += '</svg>';
+            return svg;
+        }
+        
+        // 设置已提示单词按钮
+        function setupHintedWordsButton() {
+            const hintedWordsBtn = document.getElementById('hintedWordsButton');
+            hintedWordsBtn.addEventListener('click', () => {
+                wordArchiveVisible = !wordArchiveVisible;
+                document.getElementById('wordArchive').style.display = wordArchiveVisible ? 'block' : 'none';
+                hintedWordsBtn.classList.toggle('active', wordArchiveVisible);
+            });
+        }
+        
+        // 设置季节切换
+        function setupSeasonToggle() {
+            const toggle = document.getElementById('seasonToggle');
+            toggle.addEventListener('click', () => {
+                // 循环切换季节
+                switch(currentSeason) {
+                    case 'spring':
+                        startSeasonTransition('summer');
+                        toggle.textContent = '四季：夏季';
+                        break;
+                    case 'summer':
+                        startSeasonTransition('autumn');
+                        toggle.textContent = '四季：秋季';
+                        break;
+                    case 'autumn':
+                        startSeasonTransition('winter');
+                        toggle.textContent = '四季：冬季';
+                        break;
+                    case 'winter':
+                        startSeasonTransition('spring');
+                        toggle.textContent = '四季：春季';
+                        break;
+                }
+            });
+        }
+        
+        // 开始季节过渡
+        function startSeasonTransition(newSeason) {
+            nextSeason = newSeason;
+            seasonTransition = 0;
+            seasonChangeStarted = true;
+        }
+        
+        // 设置背诵模式切换
+        function setupStudyModeToggle() {
+            const toggle = document.getElementById('studyModeToggle');
+            const hintedWordsBtn = document.getElementById('hintedWordsButton');
+            
+            toggle.addEventListener('click', () => {
+                studyMode = !studyMode;
+                toggle.textContent = studyMode ? '背诵模式：开' : '背诵模式：关';
+                toggle.classList.toggle('active', studyMode);
+                
+                // 更新UI显示
+                if (studyMode) {
+                    // 显示已提示单词按钮，但默认不显示单词列表
+                    hintedWordsBtn.style.display = 'flex';
+                    document.getElementById('wordArchive').style.display = 'none';
+                    wordArchiveVisible = false;
+                } else {
+                    // 非背诵模式隐藏按钮和列表
+                    hintedWordsBtn.style.display = 'none';
+                    document.getElementById('wordArchive').style.display = 'none';
+                    wordArchiveVisible = false;
+                }
+            });
+        }
+        
+        // 设置单词档案区域
+        function setupWordArchive() {
+            const exportButton = document.getElementById('exportButton');
+            exportButton.addEventListener('click', exportHintedWords);
+        }
+        
+        // 导出提示过的单词为Excel
+        function exportHintedWords() {
+            if (hintedWords.length === 0) {
+                alert('没有需要导出的单词！');
+                return;
+            }
+            
+            // 准备导出数据
+            const exportData = hintedWords.map(word => [
+                word.english,
+                word.chinese,
+                word.partOfSpeech,
+                word.hintCount
+            ]);
+            
+            // 添加表头
+            exportData.unshift(['英文', '中文', '词性', '提示次数']);
+            
+            // 创建工作簿
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.aoa_to_sheet(exportData);
+            
+            // 将工作表添加到工作簿
+            XLSX.utils.book_append_sheet(wb, ws, '提示单词');
+            
+            // 导出Excel文件
+            XLSX.writeFile(wb, '提示过的单词.xlsx');
+        }
+        
+        // 更新单词档案列表
+        function updateWordArchive() {
+            const container = document.getElementById('archivedWordsList');
+            container.innerHTML = '';
+            
+            if (hintedWords.length === 0) {
+                container.innerHTML = '<p style="text-align:center;">还没有提示过的单词</p>';
+                return;
+            }
+            
+            // 按提示次数降序排序
+            const sortedWords = [...hintedWords].sort((a, b) => b.hintCount - a.hintCount);
+            
+            for (const word of sortedWords) {
+                const wordElement = document.createElement('div');
+                wordElement.className = 'archiveWord';
+                
+                const englishDiv = document.createElement('div');
+                englishDiv.textContent = word.english;
+                
+                const chineseDiv = document.createElement('div');
+                chineseDiv.textContent = word.chinese;
+                
+                const posDiv = document.createElement('div');
+                posDiv.textContent = word.partOfSpeech || '无';
+                
+                const countDiv = document.createElement('div');
+                countDiv.className = 'hintCount';
+                countDiv.textContent = `提示: ${word.hintCount}`;
+                
+                wordElement.appendChild(englishDiv);
+                wordElement.appendChild(chineseDiv);
+                wordElement.appendChild(posDiv);
+                wordElement.appendChild(countDiv);
+                
+                container.appendChild(wordElement);
+            }
+            
+            // 更新已提示按钮上的数字
+            document.getElementById('hintedWordsButton').textContent = 
+                `已提示单词 (${hintedWords.length})`;
+        }
+        
+        // 添加单词到提示列表
+        function addWordToHinted(word) {
+            // 检查是否已经在列表中
+            const existingIndex = hintedWords.findIndex(w => w.english === word.english);
+            
+            if (existingIndex >= 0) {
+                // 增加提示次数
+                hintedWords[existingIndex].hintCount++;
+            } else {
+                // 添加新单词
+                hintedWords.push({
+                    ...word,
+                    hintCount: 1
+                });
+            }
+            
+            // 更新显示
+            updateWordArchive();
+        }
+        
+        // 调整Canvas大小
+        function resizeCanvas() {
+            // 检测设备方向
+            const isLandscape = window.innerWidth > window.innerHeight;
+            
+            if (isLandscape) {
+                // 横屏
+                gameWidth = Math.min(window.innerWidth, 1200);
+                gameHeight = Math.min(window.innerHeight - 10, 800); // 减少10px防止溢出
+            } else {
+                // 竖屏
+                gameWidth = window.innerWidth;
+                gameHeight = window.innerHeight - 10; // 减少10px防止溢出
+            }
+            
+            canvas.width = gameWidth;
+            canvas.height = gameHeight;
+            
+            // 更新相机尺寸
+            camera.width = gameWidth;
+            camera.height = gameHeight;
+            
+            // 如果彩虹已激活，需要重新生成SVG
+            if (weatherEffects.rainbow.active) {
+                document.getElementById('rainbow').innerHTML = generateRainbowSVG();
+            }
+            
+            // 重绘游戏
+            if (gameStarted) {
+                drawGame();
+            }
+        }
+        
+        // 设置角色选择
+        function setupCharacterSelection() {
+            const characterButtons = document.querySelectorAll('.characterButton');
+            characterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    characterButtons.forEach(b => b.classList.remove('selected'));
+                    button.classList.add('selected');
+                    selectedCharacter = button.getAttribute('data-character');
+                    
+                    switch (selectedCharacter) {
+                        case 'stickman':
+                            player.color = 'white';
+                            player.outlineColor = 'black';
+                            break;
+                        case 'ninja':
+                            player.color = '#4CAF50';
+                            player.outlineColor = '#194D23';
+                            break;
+                        case 'robot':
+                            player.color = '#f472b6';
+                            player.outlineColor = '#9d174d';
+                            break;
+                    }
+                });
+            });
+        }
+        
+        // 设置文件输入
+        function setupFileInput() {
+            const fileInput = document.getElementById('fileInput');
+            fileInput.addEventListener('change', handleFileUpload);
+        }
+        
+        // 处理文件上传
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const fileName = file.name.toLowerCase();
+            
+            document.getElementById('loading').style.display = 'flex';
+            let loadingProgress = 0;
+            const loadingInterval = setInterval(() => {
+                loadingProgress += 5;
+                document.getElementById('loadingFill').style.width = loadingProgress + '%';
+                if (loadingProgress >= 90) {
+                    clearInterval(loadingInterval);
+                }
+            }, 100);
+            
+            if (fileName.endsWith('.csv')) {
+                // 处理CSV文件
+                Papa.parse(file, {
+                    complete: function(results) {
+                        processWordData(results.data);
+                        finishLoading();
+                    },
+                    header: false
+                });
+            } else if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) {
+                // 处理Excel文件
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const sheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[sheetName];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                    processWordData(jsonData);
+                    finishLoading();
+                };
+                reader.readAsArrayBuffer(file);
+            } else {
+                alert('请上传CSV或Excel文件！');
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+        // 完成加载
+        function finishLoading() {
+            document.getElementById('loadingFill').style.width = '100%';
+            setTimeout(() => {
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('startButton').disabled = false;
+                if (wordList.length > 0) {
+                    document.getElementById('startButton').textContent = `开始游戏 (${wordList.length}个单词)`;
+                }
+            }, 500);
+        }
+        
+        // 处理单词数据
+        function processWordData(data) {
+            wordList = [];
+            
+            // 跳过可能的标题行
+            let startIndex = 0;
+            if (data.length > 0 && 
+                (typeof data[0][0] === 'string' && (
+                    data[0][0].toLowerCase().includes('english') || 
+                    data[0][0].toLowerCase().includes('word') || 
+                    data[0][0].toLowerCase().includes('单词')))) {
+                startIndex = 1;
+            }
+            
+            for (let i = startIndex; i < data.length; i++) {
+                const row = data[i];
+                if (row && row.length >= 2) {
+                    const english = row[0] ? String(row[0]).trim() : '';
+                    const chinese = row[1] ? String(row[1]).trim() : '';
+                    const partOfSpeech = row.length >= 3 ? String(row[2]).trim() : '';
+                    
+                    if (english && chinese) {
+                        wordList.push({
+                            english: english,
+                            chinese: chinese,
+                            partOfSpeech: partOfSpeech,
+                            visited: false,
+                            index: wordList.length
+                        });
+                    }
+                }
+            }
+            
+            // 打乱单词顺序
+            wordList = shuffleArray(wordList);
+            
+            // 添加索引值，用于跟踪进度
+            for (let i = 0; i < wordList.length; i++) {
+                wordList[i].index = i;
+            }
+            
+            console.log(`成功加载 ${wordList.length} 个单词`);
+        }
+        
+        // 洗牌数组
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+        
+        // 设置开始按钮
+        function setupStartButton() {
+            const startButton = document.getElementById('startButton');
+            startButton.addEventListener('click', () => {
+                if (wordList.length === 0) {
+                    alert('请先导入单词表！');
+                    return;
+                }
+                
+                document.getElementById('startScreen').style.display = 'none';
+                startGame();
+            });
+        }
+        
+        // 设置暂停按钮
+        function setupPauseButton() {
+            const pauseButton = document.getElementById('pauseButton');
+            pauseButton.addEventListener('click', () => {
+                gamePaused = true;
+                document.getElementById('pauseMenu').style.display = 'flex';
+                cancelAnimationFrame(animationId);
+            });
+            
+            const resumeButton = document.getElementById('resumeButton');
+            resumeButton.addEventListener('click', () => {
+                document.getElementById('pauseMenu').style.display = 'none';
+                gamePaused = false;
+                lastTime = performance.now();
+                animationId = requestAnimationFrame(gameLoop);
+            });
+            
+            const restartButton = document.getElementById('restartButton');
+            restartButton.addEventListener('click', () => {
+                // 修复重新开始卡顿问题
+                document.getElementById('pauseMenu').style.display = 'none';
+                gamePaused = false;
+                
+                // 清空提示过的单词
+                hintedWords = [];
+                updateWordArchive();
+                
+                // 延迟一帧启动重新开始，避免卡顿
+                setTimeout(() => {
+                    restartGame();
+                }, 0);
+            });
+            
+            const returnButton = document.getElementById('returnButton');
+            returnButton.addEventListener('click', () => {
+                // 修复返回主界面卡顿问题 - 分步处理
+                document.getElementById('pauseMenu').style.display = 'none';
+                gamePaused = false;
+                
+                // 第一步：停止游戏循环
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                    animationId = null;
+                }
+                
+                // 第二步：淡出游戏画面、回到加载中状态
+                document.getElementById('loading').style.display = 'flex';
+                document.getElementById('loadingFill').style.width = '0%';
+                
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 5;
+                    document.getElementById('loadingFill').style.width = `${progress}%`;
+                    
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        
+                        // 第三步：重置游戏状态
+                        setTimeout(() => {
+                            resetGame();
+                            
+                            // 第四步：隐藏加载，显示主界面
+                            document.getElementById('loading').style.display = 'none';
+                            document.getElementById('startScreen').style.display = 'flex';
+                            
+                            // 重新设置文件上传按钮
+                            document.getElementById('fileInput').value = '';
+                            document.getElementById('startButton').textContent = '开始游戏';
+                        }, 100);
+                    }
+                }, 20);
+            });
+        }
+        
+        // 重置游戏
+        function resetGame() {
+            // 清空单词列表，这样用户需要重新上传文件
+            wordList = [];
+            currentWordIndex = 0;
+            visibleWordIndex = 0;
+            score = 0;
+            hintedWords = [];
+            
+            // 重置天气效果
+            resetWeatherEffects();
+            
+            // 重置季节
+            currentSeason = 'spring';
+            seasonTransition = 0;
+            seasonChangeStarted = false;
+            document.getElementById('seasonToggle').textContent = '四季：春季';
+            
+            // 重置背诵模式
+            studyMode = false;
+            wordArchiveVisible = false;
+            document.getElementById('studyModeToggle').textContent = '背诵模式：关';
+            document.getElementById('studyModeToggle').classList.remove('active');
+            document.getElementById('wordArchive').style.display = 'none';
+            document.getElementById('hintedWordsButton').style.display = 'none';
+            
+            // 重置UI
+            document.getElementById('score').textContent = '单词: 0 / 0';
+            document.getElementById('progressFill').style.width = '0%';
+            
+            // 清空游戏对象
+            gameObjects.length = 0;
+            platforms.length = 0;
+            jumpboards.length = 0;
+            if (window.specialPlatforms) window.specialPlatforms.length = 0;
+            if (window.hazards) window.hazards.length = 0;
+            
+            // 重置玩家位置
+            player.x = 100;
+            player.y = gameHeight / 2;
+            player.velY = 0;
+            player.isJumping = false;
+            
+            // 清除可能的活动图标
+            activeVolumeIcon = null;
+            activeHintButton = null;
+            document.getElementById('volumeIcon').style.display = 'none';
+            document.getElementById('hintButton').style.display = 'none';
+            
+            gameRunning = false;
+            gameStarted = false;
+        }
+        
+        // 重置天气效果
+        function resetWeatherEffects() {
+            // 重置闪电
+            weatherEffects.lightning.active = false;
+            weatherEffects.lightning.opacity = 0;
+            
+            // 重置沙尘暴
+            weatherEffects.sandstorm.active = false;
+            weatherEffects.sandstorm.particles = [];
+            weatherEffects.sandstorm.intensity = 0;
+            
+            // 重置彩虹
+            weatherEffects.rainbow.active = false;
+            weatherEffects.rainbow.opacity = 0;
+            document.getElementById('rainbow').style.opacity = '0';
+        }
+        
+        // 设置键盘控制
+        function setupKeyboardControls() {
+            window.addEventListener('keydown', (e) => {
+                keys[e.key] = true;
+                
+                if (e.key === 'ArrowUp' || e.key === ' ' || e.key === 'w') {
+                    if (!player.isJumping && gameRunning) {
+                        player.velY = -player.jumpForce;
+                        player.isJumping = true;
+                    }
+                }
+                
+                // 防止方向键滚动页面
+                if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
+                    e.preventDefault();
+                }
+            });
+            
+            window.addEventListener('keyup', (e) => {
+                keys[e.key] = false;
+            });
+        }
+        
+        // 设置摇杆控制
+        function setupJoystick() {
+            const joystick = document.getElementById('joystick');
+            const knob = document.getElementById('joystickKnob');
+            const joystickRect = joystick.getBoundingClientRect();
+            const joystickRadius = joystickRect.width / 2;
+            const knobRadius = knob.offsetWidth / 2;
+            
+            let touchId = null;
+            
+            const getJoystickPosition = (x, y) => {
+                const centerX = joystickRect.left + joystickRadius;
+                const centerY = joystickRect.top + joystickRadius;
+                
+                let deltaX = x - centerX;
+                let deltaY = y - centerY;
+                
+                // 计算距离和角度
+                const distance = Math.min(joystickRadius - knobRadius, Math.sqrt(deltaX * deltaX + deltaY * deltaY));
+                const angle = Math.atan2(deltaY, deltaX);
+                
+                // 计算新位置
+                const knobX = distance * Math.cos(angle);
+                const knobY = distance * Math.sin(angle);
+                
+                return { knobX, knobY, distance, angle };
+            };
+            
+            // 更新摇杆位置
+            const updateJoystick = (x, y) => {
+                const { knobX, knobY, distance, angle } = getJoystickPosition(x, y);
+                
+                knob.style.transform = `translate(calc(-50% + ${knobX}px), calc(-50% + ${knobY}px))`;
+                
+                joystickActive = distance > 10;
+                joystickAngle = angle;
+                joystickDistance = distance / (joystickRadius - knobRadius);
+            };
+            
+            // 重置摇杆
+            const resetJoystick = () => {
+                knob.style.transform = 'translate(-50%, -50%)';
+                joystickActive = false;
+                touchId = null;
+            };
+            
+            // 触摸事件
+            joystick.addEventListener('touchstart', (e) => {
+                if (touchId === null) {
+                    touchId = e.changedTouches[0].identifier;
+                    updateJoystick(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+                }
+            });
+            
+            joystick.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                for (let i = 0; i < e.changedTouches.length; i++) {
+                    if (e.changedTouches[i].identifier === touchId) {
+                        updateJoystick(e.changedTouches[i].clientX, e.changedTouches[i].clientY);
+                        break;
+                    }
+                }
+            });
+            
+            const handleTouchEnd = (e) => {
+                for (let i = 0; i < e.changedTouches.length; i++) {
+                    if (e.changedTouches[i].identifier === touchId) {
+                        resetJoystick();
+                        break;
+                    }
+                }
+            };
+            
+            joystick.addEventListener('touchend', handleTouchEnd);
+            joystick.addEventListener('touchcancel', handleTouchEnd);
+        }
+        
+        // 设置跳跃按钮
+        function setupJumpButton() {
+            const jumpButton = document.getElementById('jumpButton');
+            
+            jumpButton.addEventListener('touchstart', () => {
+                if (!player.isJumping && gameRunning) {
+                    player.velY = -player.jumpForce;
+                    player.isJumping = true;
+                }
+            });
+        }
+        
+        // 检查碰撞
+        function checkCollision(obj1, obj2) {
+            return (
+                obj1.x < obj2.x + obj2.width &&
+                obj1.x + obj1.width > obj2.x &&
+                obj1.y < obj2.y + obj2.height &&
+                obj1.y + obj1.height > obj2.y
+            );
+        }
+        
+        // 添加装饰物 - 这个函数之前缺失，现在添加
+        function addDecorations(x, groundY) {
+            // 添加灌木丛
+            for (let i = 0; i < 3; i++) {
+                const bushX = x + Math.random() * 400 - 200;
+                createBush(bushX, groundY);
+            }
+            
+            // 添加花朵
+            for (let i = 0; i < 5; i++) {
+                const flowerX = x + Math.random() * 500 - 250;
+                createFlower(flowerX, groundY);
+            }
+            
+            // 随机添加悬崖或藤蔓
+            if (Math.random() > 0.7) {
+                if (Math.random() > 0.5) {
+                    createCliff(x + 200, groundY);
+                } else {
+                    createVine(x + 200, groundY - 300); // 藤蔓从上方垂下
+                }
+            }
+        }
+        
+        // 启动游戏
+        function startGame() {
+            if (wordList.length === 0) {
+                alert('请先导入单词表！');
+                return;
+            }
+            
+            gameStarted = true;
+            gameRunning = true;
+            currentWordIndex = 0;
+            visibleWordIndex = 0;
+            score = 0;
+            
+            // 重置天气效果
+            resetWeatherEffects();
+            
+            // 随机选择一种天气
+            randomizeWeather();
+            
+            // 重置背诵模式UI
+            document.getElementById('wordArchive').style.display = 'none';
+            wordArchiveVisible = false;
+            document.getElementById('hintedWordsButton').style.display = studyMode ? 'flex' : 'none';
+            
+            // 更新进度显示
+            updateProgressBar();
+            
+            // 重置玩家位置
+            player.x = 100;
+            player.y = gameHeight / 2;
+            player.velY = 0;
+            player.isJumping = false;
+            
+            // 重置相机
+            camera.x = 0;
+            camera.y = 0;
+            
+            // 清除现有游戏对象
+            gameObjects.length = 0;
+            platforms.length = 0;
+            jumpboards.length = 0;
+            if (window.specialPlatforms) window.specialPlatforms.length = 0;
+            if (window.hazards) window.hazards.length = 0;
+            
+            // 生成游戏关卡
+            generateLevel();
+            
+            // 启动游戏循环
+            lastTime = performance.now();
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            animationId = requestAnimationFrame(gameLoop);
+        }
+        
+        // 随机选择天气效果
+        function randomizeWeather() {
+            // 33% 概率出现特殊天气
+            if (Math.random() < 0.33) {
+                const weatherTypes = ["lightning", "sandstorm", "rainbow"];
+                const selectedWeather = weatherTypes[Math.floor(Math.random() * weatherTypes.length)];
+                
+                switch(selectedWeather) {
+                    case "lightning":
+                        activateLightning();
+                        break;
+                    case "sandstorm":
+                        activateSandstorm();
+                        break;
+                    case "rainbow":
+                        activateRainbow();
+                        break;
+                }
+            }
+        }
+        
+        // 激活闪电效果
+        function activateLightning() {
+            console.log("激活闪电效果");
+            weatherEffects.lightning.active = true;
+            weatherEffects.lightning.lastFlash = 0;
+            weatherEffects.lightning.nextFlash = Math.random() * 5000 + 2000; // 2-7秒后的第一次闪电
+            weatherEffects.lightning.opacity = 0;
+        }
+        
+        // 激活沙尘暴效果
+        function activateSandstorm() {
+            console.log("激活沙尘暴效果");
+            weatherEffects.sandstorm.active = true;
+            weatherEffects.sandstorm.intensity = 0;
+            weatherEffects.sandstorm.particles = [];
+            
+            // 创建初始沙尘粒子
+            for (let i = 0; i < 100; i++) {
+                addSandParticle();
+            }
+        }
+        
+        // 激活彩虹效果
+        function activateRainbow() {
+            console.log("激活彩虹效果");
+            weatherEffects.rainbow.active = true;
+            weatherEffects.rainbow.opacity = 0;
+            
+            // 渐变显示彩虹
+            document.getElementById('rainbow').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('rainbow').style.opacity = '1';
+            }, 1000);
+        }
+        
+        // 添加沙尘粒子
+        function addSandParticle() {
+            weatherEffects.sandstorm.particles.push({
+                x: camera.x + Math.random() * gameWidth * 1.2 - gameWidth * 0.1,
+                y: camera.y + Math.random() * gameHeight,
+                size: 1 + Math.random() * 3,
+                speed: 5 + Math.random() * 10,
+                opacity: 0.3 + Math.random() * 0.5,
+                color: `rgb(${210 + Math.random() * 30}, ${175 + Math.random() * 20}, ${140 + Math.random() * 20})`
+            });
+        }
+        
+        // 创建花朵
+        function createFlower(x, groundY) {
+            const colors = getSeasonColor('flowers');
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            
+            const flower = {
+                x: x,
+                y: groundY - 30,
+                width: 20,
+                height: 30,
+                type: 'decoration',
+                color: randomColor,
+                swayOffset: Math.random() * Math.PI * 2, // 随机摆动偏移
+                draw: function(ctx) {
+                    // 计算摆动角度
+                    const swayAngle = Math.sin(gameTime * 0.001 + this.swayOffset) * 0.1;
+                    
+                    ctx.save();
+                    ctx.translate(this.x + 10, this.y + 30);
+                    ctx.rotate(swayAngle);
+                    ctx.translate(-(this.x + 10), -(this.y + 30));
+                    
+                    // 绘制茎
+                    ctx.strokeStyle = '#7d6445';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(this.x + 10, this.y + 30);
+                    ctx.lineTo(this.x + 10, this.y + 10);
+                    ctx.stroke();
+                    
+                    // 绘制花瓣
+                    ctx.fillStyle = this.color;
+                    ctx.beginPath();
+                    for (let i = 0; i < 5; i++) {
+                        const angle = (i / 5) * Math.PI * 2;
+                        const petalX = this.x + 10 + Math.cos(angle) * 8;
+                        const petalY = this.y + 10 + Math.sin(angle) * 8;
+                        ctx.lineTo(petalX, petalY);
+                        
+                        const midAngle = ((i + 0.5) / 5) * Math.PI * 2;
+                        const midX = this.x + 10 + Math.cos(midAngle) * 4;
+                        const midY = this.y + 10 + Math.sin(midAngle) * 4;
+                        ctx.lineTo(midX, midY);
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                    
+                    // 绘制花心
+                    ctx.fillStyle = '#ffbe0b';
+                    ctx.beginPath();
+                    ctx.arc(this.x + 10, this.y + 10, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.restore();
+                }
+            };
+            
+            gameObjects.push(flower);
+        }
+
+        // 创建灌木丛
+        function createBush(x, groundY) {
+            const bush = {
+                x: x,
+                y: groundY - 30,
+                width: 50 + Math.random() * 30,
+                height: 30 + Math.random() * 20,
+                type: 'decoration',
+                draw: function(ctx) {
+                    const bushColor = getSeasonColor('trees');
+                    ctx.fillStyle = bushColor;
+                    
+                    // 绘制几个重叠的圆形来创建灌木丛
+                    ctx.beginPath();
+                    ctx.arc(this.x + this.width * 0.3, this.y + this.height * 0.7, this.width * 0.3, 0, Math.PI * 2);
+                    ctx.arc(this.x + this.width * 0.7, this.y + this.height * 0.7, this.width * 0.3, 0, Math.PI * 2);
+                    ctx.arc(this.x + this.width * 0.5, this.y + this.height * 0.3, this.width * 0.4, 0, Math.PI * 2);
+                    ctx.closePath();
+                    ctx.fill();
+                }
+            };
+            
+            gameObjects.push(bush);
+        }
+        
+        // 创建悬崖
+        function createCliff(x, groundY) {
+            const cliffWidth = 150 + Math.random() * 100;
+            
+            // 在悬崖上添加平台
+            const platformY = groundY - 150 - Math.random() * 50;
+            const platform = {
+                x: x + cliffWidth * 0.1,
+                y: platformY,
+                width: cliffWidth * 0.8,
+                height: 20,
+                type: 'platform',
+                color: '#a38560'
+            };
+            
+            platforms.push(platform);
+            gameObjects.push(platform);
+            
+            // 创建悬崖障碍物
+            const cliff = {
+                x: x,
+                y: platformY + 20,
+                width: cliffWidth,
+                height: groundY - platformY,
+                type: 'obstacle',
+                draw: function(ctx) {
+                    // 绘制悬崖
+                    const gradient = ctx.createLinearGradient(this.x, this.y, this.x, this.y + this.height);
+                    gradient.addColorStop(0, '#a38560');
+                    gradient.addColorStop(1, '#7d6445');
+                    
+                    ctx.fillStyle = gradient;
+                    ctx.beginPath();
+                    ctx.moveTo(this.x, this.y);
+                    ctx.lineTo(this.x + this.width, this.y);
+                    ctx.lineTo(this.x + this.width, this.y + this.height);
+                    ctx.lineTo(this.x, this.y + this.height);
+                    ctx.closePath();
+                    ctx.fill();
+                    
+                    // 绘制纹理
+                    ctx.strokeStyle = '#65532f';
+                    ctx.lineWidth = 1;
+                    
+                    for (let i = 1; i < 10; i++) {
+                        const lineY = this.y + this.height * (i / 10);
+                        ctx.beginPath();
+                        ctx.moveTo(this.x, lineY);
+                        ctx.lineTo(this.x + this.width, lineY + Math.sin(i) * 10);
+                        ctx.stroke();
+                    }
+                }
+            };
+            
+            gameObjects.push(cliff);
+        }
+        
+        // 创建藤蔓
+        function createVine(x, startY) {
+            const vineLength = 200 + Math.random() * 100;
+            
+            const vine = {
+                x: x,
+                y: startY,
+                width: 10,
+                height: vineLength,
+                type: 'decoration',
+                swayOffset: Math.random() * Math.PI * 2, // 随机摆动偏移
+                draw: function(ctx) {
+                    // 计算摆动
+                    const swayAmount = 20;
+                    const swayFrequency = 0.001;
+                    
+                    ctx.strokeStyle = getSeasonColor('trees');
+                    ctx.lineWidth = 4;
+                    ctx.beginPath();
+                    
+                    let lastX = this.x;
+                    ctx.moveTo(lastX, this.y);
+                    
+                    for (let y = 20; y < this.height; y += 20) {
+                        const sway = Math.sin(gameTime * swayFrequency + this.swayOffset + y * 0.01) * swayAmount;
+                        lastX = this.x + sway;
+                        ctx.lineTo(lastX, this.y + y);
+                    }
+                    
+                    ctx.stroke();
+                    
+                    // 绘制叶子
+                    ctx.fillStyle = getSeasonColor('trees');
+                    
+                    for (let y = 40; y < this.height; y += 80) {
+                        const sway = Math.sin(gameTime * swayFrequency + this.swayOffset + y * 0.01) * swayAmount;
+                        const leafX = this.x + sway;
+                        const leafY = this.y + y;
+                        
+                        // 左侧叶子
+                        ctx.beginPath();
+                        ctx.ellipse(leafX - 10, leafY, 15, 8, Math.PI / 4, 0, Math.PI * 2);
+                        ctx.fill();
+                        
+                        // 右侧叶子
+                        ctx.beginPath();
+                        ctx.ellipse(leafX + 10, leafY, 15, 8, -Math.PI / 4, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                },
+                // 藤蔓可以当作平台
+                platformCheck: function(playerObj) {
+                    // 计算当前藤蔓的摆动位置
+                    const swayAmount = 20;
+                    const swayFrequency = 0.001;
+                    
+                    // 检查玩家是否接触到藤蔓
+                    for (let y = 0; y < this.height; y += 10) {
+                        const sway = Math.sin(gameTime * swayFrequency + this.swayOffset + y * 0.01) * swayAmount;
+                        const vineX = this.x + sway;
+                        const vineY = this.y + y;
+                        
+                        const dx = Math.abs(vineX - (playerObj.x + playerObj.width / 2));
+                        const dy = Math.abs(vineY - (playerObj.y + playerObj.height / 2));
+                        
+                        if (dx < 15 && dy < 30) {
+                            return true;
+                        }
+                    }
+                    
+                    return false;
+                }
+            };
+            
+            gameObjects.push(vine);
+            
+            // 将藤蔓添加到特殊平台检查数组
+            if (!window.specialPlatforms) window.specialPlatforms = [];
+            window.specialPlatforms.push(vine);
+        }
+
+        // 重启游戏
+        function restartGame() {
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            
+            // 重置天气效果
+            resetWeatherEffects();
+            
+            // 重置单词访问状态
+            for (let i = 0; i < wordList.length; i++) {
+                wordList[i].visited = false;
+            }
+            
+            currentWordIndex = 0;
+            visibleWordIndex = 0;
+            score = 0;
+            
+            // 清除可能的活动图标
+            activeVolumeIcon = null;
+            activeHintButton = null;
+            document.getElementById('volumeIcon').style.display = 'none';
+            document.getElementById('hintButton').style.display = 'none';
+            
+            startGame();
+        }
+        
+        // 生成游戏关卡
+        function generateLevel() {
+            // 生成背景
+            generateBackground();
+            
+            // 生成地面
+            const ground = {
+                x: 0,
+                y: gameHeight - 50,
+                width: gameWidth * 100, // 很长的地面
+                height: 50,
+                type: 'platform',
+                color: getSeasonColor('ground')
+            };
+            platforms.push(ground);
+            
+            // 为每个单词创建平台和障碍物
+            let lastX = 300; // 起始X位置
+            const platformHeight = gameHeight - 50; // 地面高度
+            
+            // 添加装饰物和动态元素
+            addDecorations(lastX, platformHeight);
+            
+            // 初始化特殊平台数组和危险区域数组
+            if (!window.specialPlatforms) window.specialPlatforms = [];
+            window.specialPlatforms.length = 0;
+            
+            if (!window.hazards) window.hazards = [];
+            window.hazards.length = 0;
+            
+            jumpboards.length = 0;
+            
+            for (let i = 0; i < wordList.length; i++) {
+                const word = wordList[i];
+                const isEnglishDisplay = Math.random() > 0.5; // 随机显示英文或中文
+                const distance = 300 + Math.random() * 200; // 平台之间的距离
+                
+                lastX += distance;
+                
+                // 随机决定物体类型
+                const objectType = Math.floor(Math.random() * 3);
+                
+                if (objectType === 0) {
+                    // 岩石
+                    createRock(lastX, platformHeight, word, isEnglishDisplay);
+                } else if (objectType === 1) {
+                    // 台阶
+                    createStairs(lastX, platformHeight, word, isEnglishDisplay);
+                } else {
+                    // 植物
+                    createPlant(lastX, platformHeight, word, isEnglishDisplay);
+                }
+                
+                // 每隔几个单词添加一些装饰物
+                if (i % 3 === 0) {
+                    addDecorations(lastX + 150, platformHeight);
+                }
+                
+                // 随机添加障碍物（尖刺坑或荆棘）
+                if (i % 4 === 0) {
+                    if (Math.random() > 0.5) {
+                        createHiddenPit(lastX - 150, platformHeight);
+                    } else {
+                        createThorns(lastX - 150, platformHeight - 30, 80);
+                    }
+                }
+                
+                // 每隔一定距离添加动态敌人
+                if (i % 5 === 0) {
+                    createCrab(lastX + Math.random() * 100 - 50, platformHeight);
+                }
+                
+                // 地面下方的收集区
+                if (i % 6 === 1) {
+                    // 创建一个空洞
+                    createHiddenHole(lastX - 200, platformHeight, 180);
+                    
+                    // 在洞下面放置一些装饰物
+                    createDecorationsUnderground(lastX - 100, platformHeight + 150);
+                }
+                
+                // 随机添加跳板
+                if (i % 7 === 0) {
+                    createJumpboard(lastX - 100, platformHeight - 20);
+                }
+            }
+            
+            // 添加终点标志
+            const finishFlag = {
+                x: lastX + 500,
+                y: platformHeight - 200,
+                width: 50,
+                height: 200,
+                type: 'finish',
+                color: '#ff5733'
+            };
+            
+            gameObjects.push(finishFlag);
+            
+            // 初始化环境效果
+            initEnvironment();
+        }
+        
+        // 获取当前季节颜色
+        function getSeasonColor(type) {
+            if (!seasonChangeStarted) {
+                return seasonColors[currentSeason][type];
+            }
+            
+            // 正在季节过渡中，混合两个季节的颜色
+            const currentColor = seasonColors[currentSeason][type];
+            const nextColor = seasonColors[nextSeason][type];
+            
+            // 如果是数组（如花朵颜色），则返回当前季节的颜色
+            if (Array.isArray(currentColor)) {
+                return seasonTransition > 0.5 ? nextColor : currentColor;
+            }
+            
+            // 否则混合颜色
+            return interpolateColor(currentColor, nextColor, seasonTransition);
+        }
+        
+        // 创建地下装饰物
+        function createDecorationsUnderground(x, y) {
+            // 添加随机岩石
+            for (let i = 0; i < 3; i++) {
+                const rockX = x + Math.random() * 150 - 75;
+                const rockY = y + Math.random() * 100;
+                
+                const rock = {
+                    x: rockX,
+                    y: rockY,
+                    width: 30 + Math.random() * 20,
+                    height: 20 + Math.random() * 15,
+                    type: 'decoration',
+                    draw: function(ctx) {
+                        ctx.fillStyle = '#555';
+                        ctx.beginPath();
+                        ctx.ellipse(
+                            this.x + this.width/2, 
+                            this.y + this.height/2, 
+                            this.width/2, 
+                            this.height/2, 
+                            0, 0, Math.PI * 2
+                        );
+                        ctx.fill();
+                    }
+                };
+                
+                gameObjects.push(rock);
+            }
+            
+            // 添加水晶
+            for (let i = 0; i < 2; i++) {
+                const crystalX = x + Math.random() * 150 - 75;
+                const crystalY = y + Math.random() * 80;
+                
+                const crystal = {
+                    x: crystalX,
+                    y: crystalY,
+                    width: 20,
+                    height: 30,
+                    type: 'decoration',
+                    color: `hsl(${Math.random() * 360}, 70%, 60%)`,
+                    draw: function(ctx) {
+                        ctx.fillStyle = this.color;
+                        
+                        // 多边形水晶
+                        ctx.beginPath();
+                        ctx.moveTo(this.x + this.width/2, this.y);
+                        ctx.lineTo(this.x + this.width, this.y + this.height * 0.3);
+                        ctx.lineTo(this.x + this.width * 0.7, this.y + this.height);
+                        ctx.lineTo(this.x + this.width * 0.3, this.y + this.height);
+                        ctx.lineTo(this.x + this.width * 0.3, this.y + this.height);
+                        ctx.lineTo(this.x, this.y + this.height * 0.3);
+                        ctx.closePath();
+                        ctx.fill();
+                        
+                        // 亮点
+                        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                        ctx.beginPath();
+                        ctx.ellipse(
+                            this.x + this.width * 0.3, 
+                            this.y + this.height * 0.2,
+                            2, 4, Math.PI/4, 0, Math.PI * 2
+                        );
+                        ctx.fill();
+                    }
+                };
+                
+                gameObjects.push(crystal);
+            }
+        }
+        
+        // 创建隐藏坑 - 修改为不那么明显的坑
+        function createHiddenPit(x, groundY) {
+            // 创建坑的两侧边缘
+            const leftEdge = {
+                x: x,
+                y: groundY,
+                width: 20,
+                height: 30,
+                type: 'platform',
+                color: getSeasonColor('ground'),
+                draw: function(ctx) {
+                    // 绘制左侧边缘，和地形融合
+                    const gradient = ctx.createLinearGradient(this.x, this.y, this.x + this.width, this.y);
+                    gradient.addColorStop(0, getSeasonColor('ground'));
+                    gradient.addColorStop(1, adjustBrightness(getSeasonColor('ground'), 0.9));
+                    
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(this.x, this.y, this.width, this.height);
+                    
+                    // 添加一些草或雪
+                    ctx.fillStyle = adjustBrightness(getSeasonColor('ground'), 1.1);
+                    for (let i = 0; i < 5; i++) {
+                        const grassHeight = 3 + Math.random() * 5;
+                        ctx.fillRect(this.x + Math.random() * this.width, this.y - grassHeight, 2, grassHeight);
+                    }
+                }
+            };
+            
+            const rightEdge = {
+                x: x + 80 - 20,
+                y: groundY,
+                width: 20,
+                height: 30,
+                type: 'platform',
+                color: getSeasonColor('ground'),
+                draw: function(ctx) {
+                    // 绘制右侧边缘，和地形融合
+                    const gradient = ctx.createLinearGradient(this.x, this.y, this.x + this.width, this.y);
+                    gradient.addColorStop(0, adjustBrightness(getSeasonColor('ground'), 0.9));
+                    gradient.addColorStop(1, getSeasonColor('ground'));
+                    
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(this.x, this.y, this.width, this.height);
+                    
+                    // 添加一些草或雪
+                    ctx.fillStyle = adjustBrightness(getSeasonColor('ground'), 1.1);
+                    for (let i = 0; i < 5; i++) {
+                        const grassHeight = 3 + Math.random() * 5;
+                        ctx.fillRect(this.x + Math.random() * this.width, this.y - grassHeight, 2, grassHeight);
+                    }
+                }
+            };
+            
+            // 尖刺
+            const spikes = {
+                x: x + 20,
+                y: groundY + 15,
+                width: 40,
+                height: 15,
+                type: 'hazard',
+                draw: function(ctx) {
+                    ctx.fillStyle = '#a61e4d';
+                    
+                    // 绘制多个隐蔽的三角形尖刺
+                    const spikeCount = Math.floor(this.width / 10);
+                    const spikeWidth = this.width / spikeCount;
+                    
+                    for (let i = 0; i < spikeCount; i++) {
+                        const spikeX = this.x + i * spikeWidth;
+                        
+                        ctx.beginPath();
+                        ctx.moveTo(spikeX, this.y);
+                        ctx.lineTo(spikeX + spikeWidth / 2, this.y - this.height);
+                        ctx.lineTo(spikeX + spikeWidth, this.y);
+                        ctx.closePath();
+                        ctx.fill();
+                    }
+                    
+                    // 部分覆盖尖刺，使其不那么明显
+                    ctx.fillStyle = adjustBrightness(getSeasonColor('ground'), 0.7);
+                    ctx.fillRect(this.x, this.y - 3, this.width, 3);
+                },
+                checkHazard: function(playerObj) {
+                    if (playerObj.x < this.x + this.width &&
+                        playerObj.x + playerObj.width > this.x &&
+                        playerObj.y + playerObj.height > this.y - this.height &&
+                        playerObj.y < this.y) {
+                        
+                        // 玩家踩到尖刺，弹跳效果
+                        playerObj.velY = -playerObj.jumpForce * 0.5;
+                        
+                        // 水平方向推回
+                        if (playerObj.x + playerObj.width / 2 < this.x + this.width / 2) {
+                            playerObj.x -= 50; // 向左推
+                        } else {
+                            playerObj.x += 50; // 向右推
+                        }
+                        
+                        return true;
+                    }
+                    return false;
+                }
+            };
+            
+            platforms.push(leftEdge);
+            platforms.push(rightEdge);
+            gameObjects.push(leftEdge);
+            gameObjects.push(rightEdge);
+            gameObjects.push(spikes);
+            
+            // 将尖刺添加到危险区域检查
+            if (!window.hazards) window.hazards = [];
+            window.hazards.push(spikes);
+        }
+        
+        // 创建隐藏洞 - 看起来像普通地形的洞
+        function createHiddenHole(x, groundY, width) {
+            // 创建洞的两侧边缘
+            const leftEdge = {
+                x: x,
+                y: groundY,
+                width: 20,
+                height: 300, // 足够深
+                type: 'platform',
+                draw: function(ctx) {
+                    // 左侧陡峭但与地面融合的边缘
+                    const groundColor = getSeasonColor('ground');
+                    const gradient = ctx.createLinearGradient(this.x, this.y, this.x + this.width, this.y);
+                    gradient.addColorStop(0, groundColor);
+                    gradient.addColorStop(1, adjustBrightness(groundColor, 0.7));
+                    
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(this.x, this.y, this.width, this.height);
+                    
+                    // 添加一些草或装饰
+                    if (currentSeason !== 'winter') {
+                        ctx.fillStyle = adjustBrightness(groundColor, 1.2);
+                        for (let i = 0; i < 4; i++) {
+                            const grassHeight = 3 + Math.random() * 5;
+                            ctx.fillRect(this.x + this.width - 5 + Math.random() * 5, 
+                                         this.y - grassHeight, 2, grassHeight);
+                        }
+                    }
+                    
+                    // 悬挂的藤蔓或冰柱
+                    const vineColor = currentSeason === 'winter' ? '#E1F5FE' : '#8BC34A';
+                    ctx.strokeStyle = vineColor;
+                    ctx.lineWidth = 2;
+                    
+                    for (let i = 0; i < 2; i++) {
+                        const startX = this.x + 5 + i * 10;
+                        const length = 30 + Math.random() * 50;
+                        
+                        ctx.beginPath();
+                        ctx.moveTo(startX, this.y);
+                        
+                        // 弯曲的藤蔓
+                        const cp1x = startX - 5;
+                        const cp1y = this.y + length * 0.4;
+                        const cp2x = startX + 5;
+                        const cp2y = this.y + length * 0.8;
+                        const endX = startX;
+                        const endY = this.y + length;
+                        
+                        ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, endX, endY);
+                        ctx.stroke();
+                    }
+                }
+            };
+            
+            const rightEdge = {
+                x: x + width - 20,
+                y: groundY,
+                width: 20,
+                height: 300, // 足够深
+                type: 'platform',
+                draw: function(ctx) {
+                    // 右侧陡峭但与地面融合的边缘
+                    const groundColor = getSeasonColor('ground');
+                    const gradient = ctx.createLinearGradient(this.x, this.y, this.x + this.width, this.y);
+                    gradient.addColorStop(0, adjustBrightness(groundColor, 0.7));
+                    gradient.addColorStop(1, groundColor);
+                    
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(this.x, this.y, this.width, this.height);
+                    
+                    // 添加一些草或装饰
+                    if (currentSeason !== 'winter') {
+                        ctx.fillStyle = adjustBrightness(groundColor, 1.2);
+                        for (let i = 0; i < 4; i++) {
+                            const grassHeight = 3 + Math.random() * 5;
+                            ctx.fillRect(this.x + Math.random() * 5, 
+                                         this.y - grassHeight, 2, grassHeight);
+                        }
+                    }
+                    
+                    // 悬挂的藤蔓或冰柱
+                    const vineColor = currentSeason === 'winter' ? '#E1F5FE' : '#8BC34A';
+                    ctx.strokeStyle = vineColor;
+                    ctx.lineWidth = 2;
+                    
+                    for (let i = 0; i < 2; i++) {
+                        const startX = this.x + 5 + i * 10;
+                        const length = 20 + Math.random() * 40;
+                        
+                        ctx.beginPath();
+                        ctx.moveTo(startX, this.y);
+                        
+                        // 弯曲的藤蔓
+                        const cp1x = startX - 5;
+                        const cp1y = this.y + length * 0.3;
+                        const cp2x = startX + 5;
+                        const cp2y = this.y + length * 0.6;
+                        const endX = startX;
+                        const endY = this.y + length;
+                        
+                        ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, endX, endY);
+                        ctx.stroke();
+                    }
+                }
+            };
+            
+            // 洞底部平台
+            const bottom = {
+                x: x + 20,
+                y: groundY + 250,
+                width: width - 40,
+                height: 50,
+                type: 'platform',
+                draw: function(ctx) {
+                    // 地下洞穴地板
+                    const groundColor = adjustBrightness(getSeasonColor('ground'), 0.6);
+                    ctx.fillStyle = groundColor;
+                    ctx.fillRect(this.x, this.y, this.width, this.height);
+                    
+                    // 添加纹理
+                    ctx.strokeStyle = adjustBrightness(groundColor, 0.8);
+                    ctx.lineWidth = 1;
+                    
+                    for (let i = 0; i < this.width; i += 10) {
+                        ctx.beginPath();
+                        ctx.moveTo(this.x + i, this.y);
+                        ctx.lineTo(this.x + i, this.y + 5);
+                        ctx.stroke();
+                    }
+                    
+                    // 添加一些小石头或结晶
+                    for (let i = 0; i < 5; i++) {
+                        const rockSize = 3 + Math.random() * 5;
+                        const rockX = this.x + Math.random() * this.width;
+                        
+                        ctx.fillStyle = '#555';
+                        ctx.beginPath();
+                        ctx.arc(rockX, this.y - rockSize/2, rockSize/2, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+            };
+            
+            platforms.push(leftEdge);
+            platforms.push(rightEdge);
+            platforms.push(bottom);
+            
+            gameObjects.push(leftEdge);
+            gameObjects.push(rightEdge);
+            gameObjects.push(bottom);
+        }
+        
+        // 创建跳板 - 取代弹簧
+        function createJumpboard(x, y) {
+            const jumpboard = {
+                x: x,
+                y: y,
+                width: 60,
+                height: 20,
+                type: 'jumpboard',
+                compressed: false,
+                animationTime: 0,
+                jumpMultiplier: 1.8, // 跳板弹跳力是正常跳跃的1.8倍
+                checkInteraction: function(playerObj) {
+                    // 检查玩家是否踩到跳板
+                    if (playerObj.velY > 0 && // 玩家正在下落
+                        playerObj.x + playerObj.width > this.x + 5 &&
+                        playerObj.x < this.x + this.width - 5 &&
+                        playerObj.y + playerObj.height > this.y - 5 &&
+                        playerObj.y + playerObj.height < this.y + this.height/2) {
+                        
+                        // 压缩跳板
+                        this.compressed = true;
+                        this.animationTime = 0;
+                        
+                        // 玩家弹跳
+                        playerObj.velY = -playerObj.jumpForce * this.jumpMultiplier;
+                        playerObj.isJumping = true;
+                        
+                        return true;
+                    }
+                    return false;
+                },
+                update: function(deltaTime) {
+                    // 更新动画
+                    if (this.compressed) {
+                        this.animationTime += deltaTime * 0.01;
+                        if (this.animationTime > 1) {
+                            this.compressed = false;
+                        }
+                    }
+                },
+                draw: function(ctx) {
+                    // 根据当前季节绘制跳板
+                    const boardColor = currentSeason === 'winter' ? '#B0BEC5' : '#8D6E63'; // 冬季是浅灰色，其他季节是木色
+                    
+                    // 计算压缩状态
+                    const compressionAmount = this.compressed ? 
+                        5 * (1 - Math.sin(this.animationTime * Math.PI)) : 0;
+                    
+                    // 绘制底部支架（弹簧）
+                    ctx.fillStyle = '#555';
+                    ctx.fillRect(this.x + this.width/2 - 8, this.y + 15 + compressionAmount, 16, 5);
+                    
+                    // 绘制弹簧
+                    const springHeight = 8 - compressionAmount;
+                    ctx.strokeStyle = '#FF6B6B';
+                    ctx.lineWidth = 3;
+                    
+                    // 绘制弹簧的锯齿形状
+                    ctx.beginPath();
+                    ctx.moveTo(this.x + this.width/2 - 5, this.y + 15 + compressionAmount);
+                    ctx.lineTo(this.x + this.width/2 - 2, this.y + 12 + compressionAmount - springHeight/2);
+                    ctx.lineTo(this.x + this.width/2 + 2, this.y + 18 + compressionAmount - springHeight);
+                    ctx.lineTo(this.x + this.width/2 + 5, this.y + 15 + compressionAmount);
+                    ctx.stroke();
+                    
+                    // 绘制木板
+                    ctx.fillStyle = boardColor;
+                    // 绘制略微弯曲的木板
+                    const boardY = this.y - 3 + compressionAmount;
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(this.x, boardY + 5);
+                    ctx.quadraticCurveTo(
+                        this.x + this.width/2, boardY, 
+                        this.x + this.width, boardY + 5
+                    );
+                    ctx.lineTo(this.x + this.width, boardY + 12);
+                    ctx.quadraticCurveTo(
+                        this.x + this.width/2, boardY + 18,
+                        this.x, boardY + 12
+                    );
+                    ctx.closePath();
+                    ctx.fill();
+                    
+                    // 绘制木纹
+                    ctx.strokeStyle = adjustBrightness(boardColor, 0.7);
+                    ctx.lineWidth = 1;
+                    for (let i = 0; i < 3; i++) {
+                        const lineY = boardY + 5 + i * 3;
+                        ctx.beginPath();
+                        ctx.moveTo(this.x + 5, lineY);
+                        ctx.quadraticCurveTo(
+                            this.x + this.width/2, lineY + (i % 2 === 0 ? 2 : -1),
+                            this.x + this.width - 5, lineY
+                        );
+                        ctx.stroke();
+                    }
+                }
+            };
+            
+            jumpboards.push(jumpboard);
+            gameObjects.push(jumpboard);
+        }
+        
+        // 创建荆棘
+        function createThorns(x, y, width) {
+            const thorns = {
+                x: x,
+                y: y,
+                width: width,
+                height: 30,
+                type: 'hazard',
+                draw: function(ctx) {
+                    // 绘制荆棘底部
+                    ctx.fillStyle = '#3a5a40';
+                    ctx.fillRect(this.x, this.y + 20, this.width, 10);
+                    
+                    // 绘制荆棘尖刺
+                    ctx.fillStyle = '#a61e4d';
+                    const thornCount = Math.floor(this.width / 8);
+                    
+                    for (let i = 0; i < thornCount; i++) {
+                        const thornX = this.x + 4 + i * 8;
+                        
+                        // 上面的小尖刺
+                        ctx.beginPath();
+                        ctx.moveTo(thornX, this.y + 20);
+                        ctx.lineTo(thornX - 3, this.y + 10);
+                        ctx.lineTo(thornX + 3, this.y + 10);
+                        ctx.closePath();
+                        ctx.fill();
+                        
+                        // 大尖刺（交错排列）
+                        if (i % 2 === 0) {
+                            ctx.beginPath();
+                            ctx.moveTo(thornX, this.y + 20);
+                            ctx.lineTo(thornX - 4, this.y);
+                            ctx.lineTo(thornX + 4, this.y);
+                            ctx.closePath();
+                            ctx.fill();
+                        }
+                    }
+                },
+                // 荆棘碰撞检测
+                checkHazard: function(playerObj) {
+                    if (checkCollision(playerObj, this)) {
+                        // 玩家碰到荆棘
+                        
+                        // 水平方向推回
+                        if (playerObj.x + playerObj.width / 2 < this.x + this.width / 2) {
+                            playerObj.x -= 30; // 向左推
+                        } else {
+                            playerObj.x += 30; // 向右推
+                        }
+                        
+                        return true;
+                    }
+                    return false;
+                }
+            };
+            
+            gameObjects.push(thorns);
+            
+            // 将荆棘添加到危险区域检查
+            if (!window.hazards) window.hazards = [];
+            window.hazards.push(thorns);
+        }
+        
+        // 创建螃蟹敌人
+        function createCrab(x, groundY) {
+            const crab = {
+                x: x,
+                y: groundY - 30,
+                width: 40,
+                height: 30,
+                type: 'enemy',
+                direction: Math.random() > 0.5 ? 1 : -1, // 随机初始方向
+                speed: 1 + Math.random(),
+                moveRange: 100 + Math.random() * 100,
+                startX: x,
+                legPhase: 0,
+                updateBehavior: function(deltaTime) {
+                    // 在一定范围内左右移动
+                    this.x += this.direction * this.speed;
+                    this.legPhase += deltaTime * 0.01;
+                    
+                    // 检查是否达到移动范围边界
+                    if (this.x > this.startX + this.moveRange || this.x < this.startX - this.moveRange) {
+                        this.direction *= -1; // 改变方向
+                    }
+                    
+                    // 检查与玩家的碰撞
+                    if (checkCollision(player, this)) {
+                        // 如果玩家从上方踩到螃蟹
+                        if (player.velY > 0 && player.y + player.height < this.y + this.height / 2) {
+                            // 移除螃蟹
+                            const index = gameObjects.indexOf(this);
+                            if (index > -1) {
+                                gameObjects.splice(index, 1);
+                            }
+                            
+                            // 玩家弹跳
+                            player.velY = -player.jumpForce * 0.7;
+                        } else {
+                            // 玩家被击退
+                            player.x += (player.x < this.x) ? -30 : 30;
+                        }
+                    }
+                },
+                draw: function(ctx) {
+                    ctx.save();
+                    
+                    // 根据移动方向翻转
+                    if (this.direction < 0) {
+                        ctx.translate(this.x + this.width, this.y);
+                        ctx.scale(-1, 1);
+                        ctx.translate(-this.width, 0);
+                    } else {
+                        ctx.translate(this.x, this.y);
+                    }
+                    
+                    // 身体
+                    ctx.fillStyle = '#e63946';
+                    ctx.beginPath();
+                    ctx.ellipse(this.width / 2, this.height / 2, this.width / 2 - 5, this.height / 2 - 5, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // 眼睛
+                    ctx.fillStyle = 'white';
+                    ctx.beginPath();
+                    ctx.arc(this.width / 2 + 8, this.height / 2 - 5, 4, 0, Math.PI * 2);
+                    ctx.arc(this.width / 2 + 15, this.height / 2 - 5, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.fillStyle = 'black';
+                    ctx.beginPath();
+                    ctx.arc(this.width / 2 + 8, this.height / 2 - 5, 2, 0, Math.PI * 2);
+                    ctx.arc(this.width / 2 + 15, this.height / 2 - 5, 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // 钳子
+                    ctx.strokeStyle = '#e63946';
+                    ctx.lineWidth = 3;
+                    
+                    // 左钳子
+                    ctx.beginPath();
+                    ctx.arc(this.width / 2 - 15, this.height / 2, 8, 0.5 * Math.PI, 1.5 * Math.PI);
+                    ctx.stroke();
+                    
+                    // 右钳子
+                    ctx.beginPath();
+                    ctx.arc(this.width / 2 - 15, this.height / 2, 8, 1.5 * Math.PI, 0.5 * Math.PI);
+                    ctx.stroke();
+                    
+                    // 腿
+                    ctx.strokeStyle = '#e76f51';
+                    ctx.lineWidth = 2;
+                    
+                    // 绘制多条腿，带有动画
+                    for (let i = 0; i < 3; i++) {
+                        const legY = this.height / 2 + (i - 1) * 5;
+                        const legPhase = Math.sin(this.legPhase + i * Math.PI / 3) * 5;
+                        
+                        // 左腿
+                        ctx.beginPath();
+                        ctx.moveTo(5, legY);
+                        ctx.lineTo(-5, legY + legPhase);
+                        ctx.lineTo(-12, legY);
+                        ctx.stroke();
+                        
+                        // 右腿
+                        ctx.beginPath();
+                        ctx.moveTo(this.width - 5, legY);
+                        ctx.lineTo(this.width + 5, legY - legPhase);
+                        ctx.lineTo(this.width + 12, legY);
+                        ctx.stroke();
+                    }
+                    
+                    ctx.restore();
+                }
+            };
+            
+            gameObjects.push(crab);
+        }
+        
+        // 创建岩石
+        function createRock(x, groundY, word, isEnglishDisplay) {
+            const rockHeight = 70 + Math.random() * 50;
+            
+            const rock = {
+                x: x,
+                y: groundY - rockHeight,
+                width: 100,
+                height: rockHeight,
+                type: 'obstacle',
+                obstacleType: 'rock',
+                word: word,
+                isEnglishDisplay: isEnglishDisplay,
+                visited: false,
+                translationVisible: false,
+                color: '#666',
+                draw: function(ctx) {
+                    ctx.fillStyle = this.color;
+                    
+                    // 绘制不规则岩石形状
+                    ctx.beginPath();
+                    ctx.moveTo(this.x, this.y + this.height);
+                    ctx.lineTo(this.x, this.y + this.height * 0.7);
+                    ctx.lineTo(this.x + this.width * 0.3, this.y + this.height * 0.5);
+                    ctx.lineTo(this.x + this.width * 0.5, this.y);
+                    ctx.lineTo(this.x + this.width * 0.8, this.y + this.height * 0.3);
+                    ctx.lineTo(this.x + this.width, this.y + this.height * 0.8);
+                    ctx.lineTo(this.x + this.width, this.y + this.height);
+                    ctx.closePath();
+                    ctx.fill();
+                    
+                    // 单词文本将由drawWordTexts函数绘制，不再在此处绘制
+                }
+            };
+            
+            gameObjects.push(rock);
+            platforms.push(rock);
+        }
+        
+        // 创建台阶
+        function createStairs(x, groundY, word, isEnglishDisplay) {
+            const stairCount = 3 + Math.floor(Math.random() * 3); // 3-5个台阶
+            const stairWidth = 70;
+            const stairHeight = 30;
+            
+            for (let i = 0; i < stairCount; i++) {
+                const stair = {
+                    x: x + i * stairWidth * 0.8,
+                    y: groundY - (i + 1) * stairHeight,
+                    width: stairWidth,
+                    height: stairHeight,
+                    type: 'platform',
+                    obstacleType: 'stair',
+                    word: i === Math.floor(stairCount / 2) ? word : null,
+                    isEnglishDisplay: isEnglishDisplay,
+                    visited: false,
+                    translationVisible: false,
+                    color: '#a38560',
+                    draw: function(ctx) {
+                        ctx.fillStyle = this.color;
+                        ctx.fillRect(this.x, this.y, this.width, this.height);
+                        
+                        // 绘制纹理线条
+                        ctx.strokeStyle = '#7d6445';
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(this.x, this.y + this.height / 3);
+                        ctx.lineTo(this.x + this.width, this.y + this.height / 3);
+                        ctx.stroke();
+                        
+                        ctx.beginPath();
+                        ctx.moveTo(this.x, this.y + this.height * 2/3);
+                        ctx.lineTo(this.x + this.width, this.y + this.height * 2/3);
+                        ctx.stroke();
+                        
+                        // 单词文本将由drawWordTexts函数绘制，不再在此处绘制
+                    }
+                };
+                
+                gameObjects.push(stair);
+                platforms.push(stair);
+            }
+        }
+        
+        // 创建植物
+        function createPlant(x, groundY, word, isEnglishDisplay) {
+            const plantHeight = 100 + Math.random() * 50;
+            
+            const plant = {
+                x: x,
+                y: groundY - plantHeight,
+                width: 60,
+                height: plantHeight,
+                type: 'obstacle',
+                obstacleType: 'plant',
+                word: word,
+                isEnglishDisplay: isEnglishDisplay,
+                visited: false,
+                translationVisible: false,
+                color: getSeasonColor('trees'),
+                draw: function(ctx) {
+                    // 绘制植物茎干
+                    ctx.fillStyle = '#7d6445';
+                    ctx.fillRect(this.x + this.width/2 - 5, this.y + 30, 10, this.height - 30);
+                    
+                    // 绘制叶子
+                    ctx.fillStyle = this.color;
+                    
+                    // 左侧叶子
+                    ctx.beginPath();
+                    ctx.ellipse(this.x + 15, this.y + 50, 15, 30, Math.PI/4, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // 右侧叶子
+                    ctx.beginPath();
+                    ctx.ellipse(this.x + this.width - 15, this.y + 70, 15, 30, -Math.PI/4, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // 顶部
+                    ctx.beginPath();
+                    ctx.ellipse(this.x + this.width/2, this.y + 20, 30, 20, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // 单词文本将由drawWordTexts函数绘制，不再在此处绘制
+                }
+            };
+            
+            gameObjects.push(plant);
+        }
+        
+        // 环境变量
+        const environment = {
+            time: 0, // 0-1日夜循环
+            weather: 'clear', // clear, rain, fog
+            weatherTimer: 0,
+            weatherDuration: 0,
+            nextWeatherChange: Math.random() * 120000 + 120000, // 2-4分钟后改变天气
+            raindrops: [],
+            fogOpacity: 0
+        };
+        
+        // 初始化环境
+        function initEnvironment() {
+            environment.time = 0.3; // 从早晨开始
+            environment.weather = 'clear';
+            environment.weatherTimer = 0;
+            environment.weatherDuration = 0;
+            environment.nextWeatherChange = Math.random() * 120000 + 120000;
+            environment.raindrops = [];
+            environment.fogOpacity = 0;
+        }
+        
+        // 更新环境
+        function updateEnvironment(deltaTime) {
+            // 更新时间（日夜循环），一个完整周期约15分钟
+            environment.time = (environment.time + deltaTime * 0.000003) % 1;
+            
+            // 更新天气计时器
+            environment.weatherTimer += deltaTime;
+            
+            // 检查是否需要改变天气
+            if (environment.weatherTimer > environment.nextWeatherChange) {
+                changeWeather();
+            }
+            
+            // 更新季节过渡
+            if (seasonChangeStarted) {
+                seasonTransition += deltaTime * 0.0001; // 慢慢过渡
+                if (seasonTransition >= 1) {
+                    seasonTransition = 0;
+                    currentSeason = nextSeason;
+                    seasonChangeStarted = false;
+                }
+            }
+            
+            // 根据当前天气更新环境效果
+            switch (environment.weather) {
+                case 'rain':
+                    updateRain();
+                    break;
+                    
+                case 'fog':
+                    updateFog(deltaTime);
+                    break;
+            }
+            
+            // 更新特殊天气效果
+            updateSpecialWeatherEffects(deltaTime);
+            
+            // 更新跳板
+            for (let i = 0; i < jumpboards.length; i++) {
+                if (jumpboards[i].update) {
+                    jumpboards[i].update(deltaTime);
+                }
+                
+                if (jumpboards[i].checkInteraction) {
+                    jumpboards[i].checkInteraction(player);
+                }
+            }
+        }
+        
+        // 更新特殊天气效果
+        function updateSpecialWeatherEffects(deltaTime) {
+            // 更新闪电效果
+            if (weatherEffects.lightning.active) {
+                weatherEffects.lightning.lastFlash += deltaTime;
+                
+                // 检查是否该闪烁闪电
+                if (weatherEffects.lightning.lastFlash > weatherEffects.lightning.nextFlash) {
+                    // 随机生成下一次闪电时间
+                    weatherEffects.lightning.nextFlash = Math.random() * 10000 + 5000; // 5-15秒
+                    weatherEffects.lightning.lastFlash = 0;
+                    
+                    // 闪电动画
+                    flashLightning();
+                }
+                
+                // 闪电亮度衰减
+                if (weatherEffects.lightning.opacity > 0) {
+                    weatherEffects.lightning.opacity -= deltaTime * 0.002;
+                    if (weatherEffects.lightning.opacity < 0) {
+                        weatherEffects.lightning.opacity = 0;
+                    }
+                }
+            }
+            
+            // 更新沙尘暴效果
+            if (weatherEffects.sandstorm.active) {
+                // 更新沙尘强度
+                if (weatherEffects.sandstorm.intensity < 1) {
+                    weatherEffects.sandstorm.intensity += deltaTime * 0.0005;
+                    if (weatherEffects.sandstorm.intensity > 1) {
+                        weatherEffects.sandstorm.intensity = 1;
+                    }
+                }
+                
+                // 更新沙粒位置
+                for (let i = weatherEffects.sandstorm.particles.length - 1; i >= 0; i--) {
+                    const particle = weatherEffects.sandstorm.particles[i];
+                    
+                    // 向左移动沙粒
+                    particle.x -= particle.speed;
+                    
+                    // 如果沙粒离开屏幕，重新放置到右侧
+                    if (particle.x < camera.x - 50) {
+                        particle.x = camera.x + gameWidth + 50;
+                        particle.y = camera.y + Math.random() * gameHeight;
+                    }
+                }
+                
+                // 添加新沙粒
+                if (Math.random() < 0.3 && weatherEffects.sandstorm.particles.length < 300) {
+                    addSandParticle();
+                }
+            }
+            
+            // 更新彩虹效果
+            if (weatherEffects.rainbow.active) {
+                // 渐变显示/隐藏彩虹
+                if (weatherEffects.rainbow.opacity < 1) {
+                    weatherEffects.rainbow.opacity += deltaTime * 0.0005;
+                    if (weatherEffects.rainbow.opacity > 1) {
+                        weatherEffects.rainbow.opacity = 1;
+                    }
+                    document.getElementById('rainbow').style.opacity = weatherEffects.rainbow.opacity.toString();
+                }
+            }
+        }
+        
+        // 闪电闪烁效果
+        function flashLightning() {
+            // 随机闪电亮度
+            weatherEffects.lightning.opacity = 0.7 + Math.random() * 0.3;
+            
+            // 可以添加震动特效或声音效果
+            if (Math.random() > 0.5) {
+                // 添加随机震动效果
+                const shakeAmount = 5 + Math.random() * 5;
+                shakeScreen(shakeAmount);
+            }
+        }
+        
+        // 屏幕震动效果
+        function shakeScreen(amount) {
+            const gameContainer = document.getElementById('gameContainer');
+            
+            // 随机方向震动
+            const shakeX = (Math.random() - 0.5) * amount;
+            const shakeY = (Math.random() - 0.5) * amount;
+            
+            gameContainer.style.transform = `translate(${shakeX}px, ${shakeY}px)`;
+            
+            // 震动结束后恢复
+            setTimeout(() => {
+                gameContainer.style.transform = '';
+            }, 100);
+        }
+        
+        // 改变天气
+        function changeWeather() {
+            const weathers = ['clear', 'rain', 'fog'];
+            let newWeather;
+            
+            do {
+                newWeather = weathers[Math.floor(Math.random() * weathers.length)];
+            } while (newWeather === environment.weather);
+            
+            environment.weather = newWeather;
+            environment.weatherTimer = 0;
+            environment.weatherDuration = 0;
+            environment.nextWeatherChange = Math.random() * 120000 + 120000; // 2-4分钟
+            
+            // 初始化新天气效果
+            if (environment.weather === 'rain') {
+                environment.raindrops = [];
+                for (let i = 0; i < 100; i++) {
+                    addRaindrop();
+                }
+            } else if (environment.weather === 'fog') {
+                environment.fogOpacity = 0;
+            }
+        }
+        
+        // 更新雨效果
+        function updateRain() {
+            // 更新现有雨滴
+            for (let i = environment.raindrops.length - 1; i >= 0; i--) {
+                const drop = environment.raindrops[i];
+                drop.y += drop.speed;
+                drop.x += drop.speedX;
+                
+                // 如果雨滴离开屏幕，重置位置
+                if (drop.y > camera.y + gameHeight) {
+                    drop.y = camera.y - 10;
+                    drop.x = camera.x + Math.random() * gameWidth;
+                }
+            }
+            
+            // 随机添加新雨滴
+            if (Math.random() < 0.3 && environment.raindrops.length < 300) {
+                addRaindrop();
+            }
+        }
+        
+        // 添加雨滴
+        function addRaindrop() {
+            environment.raindrops.push({
+                x: camera.x + Math.random() * gameWidth,
+                y: camera.y - 10,
+                speed: 10 + Math.random() * 5,
+                speedX: -1 - Math.random(), // 风的效果
+                length: 10 + Math.random() * 15
+            });
+        }
+        
+        // 更新雾效果
+        function updateFog(deltaTime) {
+            // 逐渐增加雾的不透明度，直到达到最大值
+            if (environment.weatherDuration < 5000) {
+                environment.weatherDuration += deltaTime;
+                environment.fogOpacity = Math.min(0.5, environment.weatherDuration / 10000);
+            }
+        }
+        
+        // 绘制环境效果 - 静态背景
+        function drawGameBackground(ctx) {
+            // 绘制固定背景色 - 使用当前季节的颜色
+            const gradient = ctx.createLinearGradient(0, 0, 0, gameHeight);
+            gradient.addColorStop(0, '#1e3a8a'); // 深蓝色顶部
+            gradient.addColorStop(1, '#3b82f6'); // 浅蓝色底部
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, gameWidth, gameHeight);
+            
+            // 绘制一些云朵装饰
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+            
+            for (let i = 0; i < 5; i++) {
+                const cloudX = i * 200 + (gameTime * 0.01) % (gameWidth * 2) - gameWidth;
+                const cloudY = 50 + Math.sin(i * 0.7) * 30;
+                
+                drawCloud(ctx, cloudX, cloudY);
+            }
+        }
+        
+        // 绘制动态环境效果 - 用于游戏世界
+        function drawEnvironment(ctx) {
+            // 根据时间和季节绘制天空颜色
+            let skyColor, horizonColor;
+            
+            // 获取当前季节的天空颜色
+            const seasonSkyTop = getSeasonColor('skyTop');
+            const seasonSkyBottom = getSeasonColor('skyBottom');
+            
+            if (environment.time < 0.25) { // 早晨
+                const t = environment.time / 0.25;
+                skyColor = interpolateColor('#0c2461', seasonSkyTop, t);
+                horizonColor = interpolateColor('#eb2f06', seasonSkyBottom, t);
+            } else if (environment.time < 0.75) { // 白天
+                const t = (environment.time - 0.25) / 0.5;
+                skyColor = interpolateColor(seasonSkyTop, '#0c2461', t);
+                horizonColor = interpolateColor(seasonSkyBottom, '#eb2f06', t);
+            } else { // 晚上
+                const t = (environment.time - 0.75) / 0.25;
+                skyColor = interpolateColor('#0c2461', '#0c2461', t);
+                horizonColor = interpolateColor('#eb2f06', '#0c2461', t);
+            }
+            
+            // 这里只绘制游戏世界内的天空效果
+            const gradient = ctx.createLinearGradient(0, 0, 0, gameHeight);
+            gradient.addColorStop(0, skyColor);
+            gradient.addColorStop(1, horizonColor);
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(camera.x, camera.y, gameWidth, gameHeight);
+            
+            // 绘制太阳或月亮
+            if (environment.time < 0.5) {
+                // 太阳
+                const sunProgress = environment.time / 0.5;
+                const sunX = camera.x + gameWidth * (0.1 + sunProgress * 0.8);
+                const sunY = camera.y + gameHeight * (0.8 - sunProgress * 0.6);
+                
+                const sunGlow = ctx.createRadialGradient(
+                    sunX, sunY, 0,
+                    sunX, sunY, 60
+                );
+                sunGlow.addColorStop(0, 'rgba(255, 255, 190, 1)');
+                sunGlow.addColorStop(0.3, 'rgba(255, 200, 100, 0.8)');
+                sunGlow.addColorStop(1, 'rgba(255, 200, 100, 0)');
+                
+                ctx.fillStyle = sunGlow;
+                ctx.fillRect(sunX - 60, sunY - 60, 120, 120);
+                
+                ctx.fillStyle = '#fffcba';
+                ctx.beginPath();
+                ctx.arc(sunX, sunY, 30, 0, Math.PI * 2);
+                ctx.fill();
+            } else {
+                // 月亮
+                const moonProgress = (environment.time - 0.5) / 0.5;
+                const moonX = camera.x + gameWidth * (0.9 - moonProgress * 0.8);
+                const moonY = camera.y + gameHeight * (0.2 + moonProgress * 0.6);
+                
+                // 月光光晕
+                const moonGlow = ctx.createRadialGradient(
+                    moonX, moonY, 0,
+                    moonX, moonY, 50
+                );
+                moonGlow.addColorStop(0, 'rgba(230, 230, 255, 0.7)');
+                moonGlow.addColorStop(1, 'rgba(230, 230, 255, 0)');
+                
+                ctx.fillStyle = moonGlow;
+                ctx.fillRect(moonX - 50, moonY - 50, 100, 100);
+                
+                // 月亮
+                ctx.fillStyle = '#e6e6ff';
+                ctx.beginPath();
+                ctx.arc(moonX, moonY, 20, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // 月亮表面的陨石坑
+                ctx.fillStyle = 'rgba(200, 200, 230, 0.8)';
+                ctx.beginPath();
+                ctx.arc(moonX - 8, moonY - 5, 5, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.beginPath();
+                ctx.arc(moonX + 5, moonY + 8, 4, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.beginPath();
+                ctx.arc(moonX + 7, moonY - 7, 3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            
+            // 绘制星星（仅在晚上）
+            if (environment.time > 0.7 || environment.time < 0.2) {
+                ctx.fillStyle = 'white';
+                
+                for (let i = 0; i < 100; i++) {
+                    const starX = (i * 173) % gameWidth + camera.x;
+                    const starY = (i * 121) % gameHeight * 0.8 + camera.y;
+                    
+                    // 星星闪烁效果
+                    const twinkle = 0.5 + Math.sin(gameTime * 0.001 + i) * 0.5;
+                    const size = 1 + Math.sin(gameTime * 0.0003 + i * 0.7) * 0.5;
+                    
+                    ctx.globalAlpha = twinkle;
+                    ctx.fillRect(starX, starY, size, size);
+                }
+                
+                ctx.globalAlpha = 1;
+            }
+            
+            // 根据天气绘制额外效果
+            switch (environment.weather) {
+                case 'rain':
+                    drawRain(ctx);
+                    break;
+                    
+                case 'fog':
+                    drawFog(ctx);
+                    break;
+            }
+            
+            // 绘制改进的山脉 - 不再只是三角形
+            drawMountains(ctx);
+            
+            // 绘制特殊天气效果
+            drawSpecialWeatherEffects(ctx);
+        }
+        
+        // 绘制特殊天气效果
+        function drawSpecialWeatherEffects(ctx) {
+            // 绘制闪电
+            if (weatherEffects.lightning.active && weatherEffects.lightning.opacity > 0) {
+                // 绘制闪电覆盖整个屏幕的白色闪光
+                ctx.fillStyle = `rgba(255, 255, 255, ${weatherEffects.lightning.opacity})`;
+                ctx.fillRect(camera.x, camera.y, gameWidth, gameHeight);
+                
+                // 随机绘制几道闪电
+                if (weatherEffects.lightning.opacity > 0.5) {
+                    drawLightningBolt(ctx);
+                }
+            }
+            
+            // 绘制沙尘暴
+            if (weatherEffects.sandstorm.active) {
+                // 绘制沙尘暴粒子
+                for (const particle of weatherEffects.sandstorm.particles) {
+                    ctx.fillStyle = particle.color;
+                    ctx.globalAlpha = particle.opacity * weatherEffects.sandstorm.intensity;
+                    ctx.fillRect(particle.x, particle.y, particle.size, particle.size);
+                }
+                
+                // 绘制沙尘暴覆盖层
+                ctx.globalAlpha = 0.2 * weatherEffects.sandstorm.intensity;
+                ctx.fillStyle = '#d2b48c'; // 沙色
+                ctx.fillRect(camera.x, camera.y, gameWidth, gameHeight);
+                
+                ctx.globalAlpha = 1;
+            }
+            
+            // 彩虹效果在HTML中通过SVG绘制
+        }
+        
+        // 绘制闪电
+        function drawLightningBolt(ctx) {
+            // 在屏幕上随机位置绘制闪电
+            const startX = camera.x + Math.random() * gameWidth;
+            const startY = camera.y;
+            let endY = camera.y + gameHeight * 0.7 + Math.random() * (gameHeight * 0.3);
+            
+            // 闪电路径
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(startX, startY);
+            
+            let currentX = startX;
+            let currentY = startY;
+            
+            // 创建锯齿状闪电
+            while (currentY < endY) {
+                // 下一个点的偏移
+                const nextX = currentX + (Math.random() - 0.5) * 100;
+                const nextY = currentY + Math.random() * 50 + 20;
+                
+                ctx.lineTo(nextX, nextY);
+                
+                currentX = nextX;
+                currentY = nextY;
+            }
+            
+            ctx.stroke();
+            
+            // 绘制闪电的发光效果
+            const gradient = ctx.createLinearGradient(startX, startY, currentX, currentY);
+            gradient.addColorStop(0, 'rgba(255, 255, 255, 0.5)');
+            gradient.addColorStop(1, 'rgba(100, 149, 237, 0.2)');
+            
+            ctx.lineWidth = 8;
+            ctx.strokeStyle = gradient;
+            ctx.stroke();
+        }
+        
+        // 绘制改进的山脉
+        function drawMountains(ctx) {
+            ctx.fillStyle = getSeasonColor('ground');
+            
+            // 绘制远景山脉
+            for (let i = 0; i < 6; i++) {
+                const mountainX = (i * 600) - (camera.x * 0.4) % 3600;
+                const baseHeight = 80 + Math.sin(i * 0.7) * 40;
+                
+                // 绘制曲线山脉而不是简单的三角形
+                ctx.beginPath();
+                ctx.moveTo(mountainX - 100, gameHeight - 50);
+                
+                // 左侧山坡
+                ctx.bezierCurveTo(
+                    mountainX - 50, gameHeight - 50 - baseHeight * 0.5,
+                    mountainX + 50, gameHeight - 50 - baseHeight * 0.8,
+                    mountainX + 100, gameHeight - 50 - baseHeight
+                );
+                
+                // 山顶
+                ctx.lineTo(mountainX + 100, gameHeight - 50 - baseHeight);
+                
+                // 右侧山坡
+                ctx.bezierCurveTo(
+                    mountainX + 150, gameHeight - 50 - baseHeight * 0.8,
+                    mountainX + 250, gameHeight - 50 - baseHeight * 0.3,
+                    mountainX + 300, gameHeight - 50
+                );
+                
+                ctx.closePath();
+                ctx.fill();
+                
+                // 添加山上的雪（冬季）
+                if (currentSeason === 'winter' || 
+                    (seasonChangeStarted && nextSeason === 'winter' && seasonTransition > 0.5)) {
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                    
+                    ctx.beginPath();
+                    ctx.moveTo(mountainX + 40, gameHeight - 50 - baseHeight * 0.7);
+                    ctx.bezierCurveTo(
+                        mountainX + 70, gameHeight - 50 - baseHeight * 0.9,
+                        mountainX + 130, gameHeight - 50 - baseHeight * 0.9,
+                        mountainX + 160, gameHeight - 50 - baseHeight * 0.7
+                    );
+                    ctx.lineTo(mountainX + 100, gameHeight - 50 - baseHeight);
+                    ctx.closePath();
+                    ctx.fill();
+                    
+                    ctx.fillStyle = getSeasonColor('ground');
+                }
+            }
+            
+            // 绘制近景小山丘
+            for (let i = 0; i < 10; i++) {
+                const hillX = (i * 300) - (camera.x * 0.7) % 3000;
+                const hillHeight = 40 + Math.sin(i * 1.3) * 20;
+                
+                ctx.fillStyle = adjustBrightness(getSeasonColor('ground'), 1.1); // 稍微亮一点
+                
+                ctx.beginPath();
+                ctx.moveTo(hillX - 50, gameHeight - 50);
+                
+                // 曲线小山丘
+                ctx.bezierCurveTo(
+                    hillX, gameHeight - 50 - hillHeight * 0.7,
+                    hillX + 50, gameHeight - 50 - hillHeight,
+                    hillX + 100, gameHeight - 50 - hillHeight * 0.8
+                );
+                
+                ctx.bezierCurveTo(
+                    hillX + 150, gameHeight - 50 - hillHeight * 0.6,
+                    hillX + 200, gameHeight - 50 - hillHeight * 0.3,
+                    hillX + 250, gameHeight - 50
+                );
+                
+                ctx.closePath();
+                ctx.fill();
+            }
+        }
+        
+        // 调整颜色亮度
+        function adjustBrightness(color, factor) {
+            if (color.startsWith('#')) {
+                const r = parseInt(color.substr(1, 2), 16);
+                const g = parseInt(color.substr(3, 2), 16);
+                const b = parseInt(color.substr(5, 2), 16);
+                
+                const newR = Math.min(255, Math.round(r * factor));
+                const newG = Math.min(255, Math.round(g * factor));
+                const newB = Math.min(255, Math.round(b * factor));
+                
+                return `rgb(${newR}, ${newG}, ${newB})`;
+            } else if (color.startsWith('rgb')) {
+                const match = color.match(/\d+/g);
+                if (match && match.length >= 3) {
+                    const r = parseInt(match[0]);
+                    const g = parseInt(match[1]);
+                    const b = parseInt(match[2]);
+                    
+                    const newR = Math.min(255, Math.round(r * factor));
+                    const newG = Math.min(255, Math.round(g * factor));
+                    const newB = Math.min(255, Math.round(b * factor));
+                    
+                    return `rgb(${newR}, ${newG}, ${newB})`;
+                }
+            }
+            return color;
+        }
+        
+        // 绘制云朵
+        function drawCloud(ctx, x, y) {
+            ctx.beginPath();
+            ctx.arc(x, y, 30, 0, Math.PI * 2);
+            ctx.arc(x + 25, y - 10, 25, 0, Math.PI * 2);
+            ctx.arc(x + 45, y, 20, 0, Math.PI * 2);
+            ctx.arc(x + 25, y + 10, 15, 0, Math.PI * 2);
+            ctx.closePath();
+            ctx.fill();
+        }
+        
+        // 颜色插值函数
+        function interpolateColor(color1, color2, t) {
+            // 解析颜色
+            const parseColor = (color) => {
+                if (color.startsWith('#')) {
+                    const r = parseInt(color.substr(1, 2), 16);
+                    const g = parseInt(color.substr(3, 2), 16);
+                    const b = parseInt(color.substr(5, 2), 16);
+                    return [r, g, b];
+                } else if (color.startsWith('rgb')) {
+                    const match = color.match(/\d+/g);
+                    if (match && match.length >= 3) {
+                        return [parseInt(match[0]), parseInt(match[1]), parseInt(match[2])];
+                    }
+                }
+                return [0, 0, 0];
+            };
+            
+            const [r1, g1, b1] = parseColor(color1);
+            const [r2, g2, b2] = parseColor(color2);
+            
+            const r = Math.round(r1 + (r2 - r1) * t);
+            const g = Math.round(g1 + (g2 - g1) * t);
+            const b = Math.round(b1 + (b2 - b1) * t);
+            
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+        
+        // 绘制雨
+        function drawRain(ctx) {
+            ctx.strokeStyle = 'rgba(200, 220, 255, 0.6)';
+            ctx.lineWidth = 1;
+            
+            for (const drop of environment.raindrops) {
+                ctx.beginPath();
+                ctx.moveTo(drop.x, drop.y);
+                ctx.lineTo(drop.x + drop.speedX * 2, drop.y + drop.length);
+                ctx.stroke();
+            }
+            
+            // 雨天的阴影效果
+            ctx.fillStyle = 'rgba(0, 10, 50, 0.1)';
+            ctx.fillRect(camera.x, camera.y, gameWidth, gameHeight);
+            
+            // 冬季时雨变成雪
+            if (currentSeason === 'winter' || 
+                (seasonChangeStarted && nextSeason === 'winter' && seasonTransition > 0.5)) {
+                drawSnow(ctx);
+            }
+        }
+        
+        // 绘制雪（冬季特效）
+        function drawSnow(ctx) {
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            
+            for (const drop of environment.raindrops) {
+                // 将雨滴绘制为雪花
+                const size = 2 + Math.random() * 3;
+                
+                ctx.beginPath();
+                ctx.arc(drop.x, drop.y, size, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // 一些雪花添加简单的结晶图案
+                if (Math.random() > 0.7) {
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+                    ctx.lineWidth = 1;
+                    
+                    // 绘制雪花结晶线
+                    for (let i = 0; i < 3; i++) {
+                        const angle = (i / 3) * Math.PI;
+                        ctx.beginPath();
+                        ctx.moveTo(drop.x, drop.y);
+                        ctx.lineTo(
+                            drop.x + Math.cos(angle) * size * 2,
+                            drop.y + Math.sin(angle) * size * 2
+                        );
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+        
+        // 绘制雾
+        function drawFog(ctx) {
+            ctx.fillStyle = `rgba(200, 220, 255, ${environment.fogOpacity})`;
+            ctx.fillRect(camera.x, camera.y, gameWidth, gameHeight);
+            
+            // 绘制一些随机的雾气流动
+            for (let i = 0; i < 10; i++) {
+                const fogX = (camera.x + (i * 500 + gameTime * 0.05) % (gameWidth * 2)) - gameWidth * 0.5;
+                const fogY = camera.y + (Math.sin(i * 0.7) * 0.3 + 0.5) * gameHeight;
+                
+                const fogGradient = ctx.createRadialGradient(
+                    fogX, fogY, 0,
+                    fogX, fogY, 300
+                );
+                fogGradient.addColorStop(0, `rgba(255, 255, 255, ${environment.fogOpacity * 0.7})`);
+                fogGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                
+                ctx.fillStyle = fogGradient;
+                ctx.fillRect(fogX - 300, fogY - 300, 600, 600);
+            }
+        }
+        
+        // 生成背景 - 现在由drawGameBackground和drawEnvironment分开处理
+        function generateBackground() {
+            // 动态背景将通过drawEnvironment函数绘制
+            backgrounds.length = 0; // 清空原有背景
+            
+            backgrounds.push({
+                draw: function(ctx) {
+                    drawEnvironment(ctx);
+                }
+            });
+        }
+        
+        // 更新进度条
+        function updateProgressBar() {
+            // 更新左上角单词进度显示
+            document.getElementById('score').textContent = `单词: ${visibleWordIndex + 1} / ${wordList.length}`;
+            
+            // 更新进度条填充
+            const progressPercentage = (visibleWordIndex / (wordList.length - 1)) * 100;
+            document.getElementById('progressFill').style.width = progressPercentage + '%';
+        }
+        
+        // 检查玩家与单词对象的交互 - 带有背诵模式支持
+        function checkWordInteraction() {
+            let currentVisibleIndex = -1;
+            
+            for (let i = 0; i < gameObjects.length; i++) {
+                const obj = gameObjects[i];
+                
+                if (obj.word) {
+                    // 计算玩家和单词对象之间的距离
+                    const dx = (player.x + player.width / 2) - (obj.x + obj.width / 2);
+                    const dy = (player.y + player.height / 2) - (obj.y + obj.height / 2);
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    // 检查当前看到的单词索引
+                    if (distance < 300 && obj.word.index > currentVisibleIndex) {
+                        currentVisibleIndex = obj.word.index;
+                    }
+                    
+                    // 如果距离小于150，根据背诵模式决定显示提示或直接显示释义
+                    if (distance < 150) {
+                        if (studyMode) {
+                            // 背诵模式：显示提示按钮，需要点击才显示释义
+                            if (!obj.hintShown) {
+                                showHintButton(obj);
+                                obj.hintShown = true;
+                            }
+                        } else {
+                            // 普通模式：直接显示释义和音量按钮
+                            if (!obj.translationVisible) {
+                                obj.translationVisible = true;
+                                
+                                // 显示音量图标
+                                showVolumeIcon(obj);
+                                
+                                // 显示单词释义
+                                showWordTranslation(obj);
+                                
+                                // 如果是第一次接触，更新分数
+                                if (!obj.visited) {
+                                    obj.visited = true;
+                                    score++;
+                                    
+                                    // 更新当前最远单词索引（仅当更远时）
+                                    if (obj.word.index > currentWordIndex) {
+                                        currentWordIndex = obj.word.index;
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        // 距离变远后，标记为隐藏，这样再次接近时可以再显示
+                        obj.translationVisible = false;
+                        obj.hintShown = false;
+                    }
+                }
+            }
+            
+            // 更新当前可见单词索引
+            if (currentVisibleIndex >= 0) {
+                visibleWordIndex = currentVisibleIndex;
+                updateProgressBar();
+            }
+        }
+        
+        // 显示提示按钮 - 背诵模式专用
+        function showHintButton(wordObj) {
+            const hintButton = document.getElementById('hintButton');
+            
+            // 定位提示按钮在屏幕上的位置，放在单词正上方
+            const buttonX = wordObj.x - camera.x + wordObj.width / 2 - 20;
+            const buttonY = wordObj.y - camera.y - 50;
+            
+            hintButton.style.left = buttonX + 'px';
+            hintButton.style.top = buttonY + 'px';
+            hintButton.style.display = 'flex';
+            
+            // 存储当前单词
+            activeHintButton = {
+                wordObj: wordObj,
+                element: hintButton
+            };
+            
+            // 点击事件
+            hintButton.onclick = function() {
+                // 显示单词释义和发音
+                wordObj.translationVisible = true;
+                showVolumeIcon(wordObj);
+                showWordTranslation(wordObj);
+                
+                // 记录提示次数
+                addWordToHinted(wordObj.word);
+                
+                // 隐藏提示按钮
+                hintButton.style.display = 'none';
+                activeHintButton = null;
+            };
+        }
+        
+        // 显示音量图标
+        function showVolumeIcon(wordObj) {
+            const volumeIcon = document.getElementById('volumeIcon');
+            
+            // 定位音量图标在屏幕上的位置，放在单词旁边而不是上方
+            const iconX = wordObj.x - camera.x + wordObj.width + 20;
+            const iconY = wordObj.y - camera.y;
+            
+            volumeIcon.style.left = iconX + 'px';
+            volumeIcon.style.top = iconY + 'px';
+            volumeIcon.style.display = 'flex';
+            
+            // 存储当前单词
+            activeVolumeIcon = {
+                word: wordObj.word.english,
+                element: volumeIcon
+            };
+            
+            // 点击事件
+            volumeIcon.onclick = function() {
+                speakWord(wordObj.word.english);
+            };
+            
+            // 自动发音
+            speakWord(wordObj.word.english);
+        }
+        
+        // 朗读单词
+        function speakWord(word) {
+            const speech = new SpeechSynthesisUtterance(word);
+            speech.lang = 'en-US';
+            window.speechSynthesis.speak(speech);
+        }
+        
+        // 显示单词释义 - 改进对齐和样式
+        function showWordTranslation(wordObj) {
+            // 如果已经有该单词的释义正在显示，不要重复创建
+            for (let i = 0; i < gameObjects.length; i++) {
+                if (gameObjects[i].isTranslationFor && gameObjects[i].isTranslationFor === wordObj) {
+                    return;
+                }
+            }
+            
+            // 单词翻译显示在单词下方位置
+            const x = wordObj.x + wordObj.width / 2;
+            const y = wordObj.y + wordObj.height + 30;
+            
+            const translation = {
+                x: x,
+                y: y,
+                isTranslationFor: wordObj,
+                opacity: 1.0,
+                text: wordObj.isEnglishDisplay ? wordObj.word.chinese : wordObj.word.english,
+                partOfSpeech: wordObj.word.partOfSpeech,
+                color: wordObj.isEnglishDisplay ? '#ff9a3c' : '#4cc9f0',
+                update: function() {
+                    // 保持位置相对于单词
+                    this.x = wordObj.x + wordObj.width / 2;
+                    this.y = wordObj.y + wordObj.height + 30;
+                    
+                    // 只有当translationVisible变为false时才淡出
+                    if (!wordObj.translationVisible) {
+                        this.opacity -= 0.05;
+                        if (this.opacity <= 0) {
+                            return false;
+                        }
+                    } else {
+                        this.opacity = Math.min(1.0, this.opacity + 0.1);
+                    }
+                    return true;
+                },
+                draw: function(ctx) {
+                    if (this.opacity <= 0) return;
+                    
+                    // 绘制带有不同背景色的单词翻译和词性
+                    ctx.font = 'bold 18px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    
+                    // 背景
+                    const text = this.text;
+                    const partOfSpeech = this.partOfSpeech;
+                    
+                    const textWidth = ctx.measureText(text).width;
+                    const posWidth = partOfSpeech ? ctx.measureText(partOfSpeech).width : 0;
+                    const maxWidth = Math.max(textWidth, posWidth);
+                    const padding = 10;
+                    
+                    // 计算背景高度 - 根据是否有词性动态调整
+                    const lineHeight = 24; // 单行文本高度
+                    const bgHeight = partOfSpeech ? lineHeight * 2 + padding * 2 : lineHeight + padding * 2;
+                    
+                    // 绘制翻译背景
+                    ctx.fillStyle = `rgba(0, 0, 0, ${this.opacity * 0.7})`;
+                    ctx.fillRect(
+                        this.x - maxWidth/2 - padding, 
+                        this.y - bgHeight/2, 
+                        maxWidth + padding * 2, 
+                        bgHeight
+                    );
+                    
+                    // 绘制翻译文本
+                    ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                    
+                    if (partOfSpeech) {
+                        // 有词性时，显示在两行，保持垂直居中
+                        const textY = this.y - lineHeight/2;
+                        const posY = this.y + lineHeight/2;
+                        
+                        ctx.fillText(text, this.x, textY);
+                        
+                        // 绘制词性
+                        ctx.font = 'italic 14px Arial';
+                        ctx.fillStyle = `rgba(200, 200, 200, ${this.opacity})`;
+                        ctx.fillText(partOfSpeech, this.x, posY);
+                    } else {
+                        // 无词性时，只绘制翻译，垂直居中
+                        ctx.fillText(text, this.x, this.y);
+                    }
+                }
+            };
+            
+            gameObjects.push(translation);
+        }
+        
+        // 新添加的函数：绘制所有单词文本，确保它们显示在最前面
+        function drawWordTexts(ctx) {
+            for (let i = 0; i < gameObjects.length; i++) {
+                const obj = gameObjects[i];
+                
+                // 只处理有单词的对象且在视野内
+                if (obj.word && 
+                    obj.x + (obj.width || 0) > camera.x && 
+                    obj.x < camera.x + camera.width &&
+                    obj.y + (obj.height || 0) > camera.y && 
+                    obj.y < camera.y + camera.height) {
+                    
+                    // 绘制单词文本
+                    ctx.font = 'bold 16px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillStyle = 'white';
+                    
+                    const text = obj.isEnglishDisplay ? obj.word.english : obj.word.chinese;
+                    ctx.fillText(text, obj.x + obj.width / 2, obj.y + obj.height / 2);
+                }
+            }
+        }
+        
+        // 绘制角色
+        function drawPlayer(ctx) {
+            // 保存当前绘图状态
+            ctx.save();
+            
+            // 如果角色向左移动，水平翻转
+            if (player.isMovingLeft) {
+                ctx.translate(player.x + player.width, player.y);
+                ctx.scale(-1, 1);
+                ctx.translate(-player.width, 0);
+            } else {
+                ctx.translate(player.x, player.y);
+            }
+            
+            // 设置粗线条
+            ctx.strokeStyle = player.outlineColor;
+            ctx.lineWidth = player.outlineWidth;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            
+            // 根据选择的角色绘制不同的形状
+            switch (selectedCharacter) {
+                case 'stickman':
+                    drawStickman(ctx);
+                    break;
+                    
+                case 'ninja':
+                    drawNinja(ctx);
+                    break;
+                    
+                case 'robot':
+                    drawRobot(ctx);
+                    break;
+            }
+            
+            // 恢复绘图状态
+          // 恢复绘图状态
+          ctx.restore();
+        }
+        
+        // 绘制火柴人
+        function drawStickman(ctx) {
+            // 计算动画帧
+            const jumpOffset = player.isJumping ? -3 : 0;
+            const bobbleOffset = player.isJumping ? 0 : Math.sin(player.frameCount * 0.2) * 2;
+            
+            // 头部
+            ctx.beginPath();
+            ctx.arc(player.width / 2, 15, 12, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            // 身体
+            ctx.beginPath();
+            ctx.moveTo(player.width / 2, 27);
+            ctx.lineTo(player.width / 2, 55);
+            ctx.stroke();
+            
+            // 手臂
+            if (player.isJumping) {
+                // 跳跃时手臂上举
+                ctx.beginPath();
+                ctx.moveTo(player.width / 2, 35);
+                ctx.lineTo(player.width / 2 - 15, 25 + jumpOffset);
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.moveTo(player.width / 2, 35);
+                ctx.lineTo(player.width / 2 + 15, 25 + jumpOffset);
+                ctx.stroke();
+            } else {
+                // 走路时手臂摆动
+                ctx.beginPath();
+                ctx.moveTo(player.width / 2, 35);
+                ctx.lineTo(player.width / 2 - 15, 40 + Math.sin(player.frameCount * 0.2) * 5);
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.moveTo(player.width / 2, 35);
+                ctx.lineTo(player.width / 2 + 15, 40 + Math.sin(player.frameCount * 0.2 + Math.PI) * 5);
+                ctx.stroke();
+            }
+            
+            // 腿部
+            ctx.beginPath();
+            ctx.moveTo(player.width / 2, 55);
+            ctx.lineTo(player.width / 2 - 10, 75 + bobbleOffset);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(player.width / 2, 55);
+            ctx.lineTo(player.width / 2 + 10, 75 + Math.sin(player.frameCount * 0.2 + Math.PI) * 2);
+            ctx.stroke();
+        }
+        
+        // 绘制忍者
+        function drawNinja(ctx) {
+            // 计算动画帧
+            const jumpOffset = player.isJumping ? -3 : 0;
+            const bobbleOffset = player.isJumping ? 0 : Math.sin(player.frameCount * 0.2) * 2;
+            
+            // 头部
+            ctx.beginPath();
+            ctx.arc(player.width / 2, 15, 12, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            // 忍者头带
+            ctx.beginPath();
+            ctx.moveTo(player.width / 2 - 14, 15);
+            ctx.lineTo(player.width / 2 + 14, 15);
+            ctx.stroke();
+            
+            // 身体
+            ctx.beginPath();
+            ctx.moveTo(player.width / 2, 27);
+            ctx.lineTo(player.width / 2, 55);
+            ctx.stroke();
+            
+            // 手臂
+            if (player.isJumping) {
+                // 跳跃时手势不同
+                ctx.beginPath();
+                ctx.moveTo(player.width / 2, 35);
+                ctx.lineTo(player.width / 2 - 15, 30 + jumpOffset);
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.moveTo(player.width / 2, 35);
+                ctx.lineTo(player.width / 2 + 15, 30 + jumpOffset);
+                ctx.stroke();
+            } else {
+                // 忍者跑步姿势
+                ctx.beginPath();
+                ctx.moveTo(player.width / 2, 35);
+                ctx.lineTo(player.width / 2 - 18, 30 + Math.sin(player.frameCount * 0.3) * 8);
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.moveTo(player.width / 2, 35);
+                ctx.lineTo(player.width / 2 + 18, 30 + Math.sin(player.frameCount * 0.3 + Math.PI) * 8);
+                ctx.stroke();
+            }
+            
+            // 腿部
+            ctx.beginPath();
+            ctx.moveTo(player.width / 2, 55);
+            ctx.lineTo(player.width / 2 - 12, 75 + bobbleOffset);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(player.width / 2, 55);
+            ctx.lineTo(player.width / 2 + 12, 75 + Math.sin(player.frameCount * 0.2 + Math.PI) * 2);
+            ctx.stroke();
+        }
+        
+        // 绘制机器人
+        function drawRobot(ctx) {
+            const bobbleOffset = player.isJumping ? 0 : Math.sin(player.frameCount * 0.2) * 1;
+            
+            // 头部
+            ctx.strokeRect(player.width / 2 - 10, 5, 20, 15);
+            
+            // 眼睛
+            ctx.fillStyle = player.color;
+            ctx.beginPath();
+            ctx.arc(player.width / 2 - 5, 12, 3, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(player.width / 2 + 5, 12, 3, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 身体
+            ctx.strokeRect(player.width / 2 - 15, 20, 30, 30);
+            
+            // 控制面板
+            ctx.beginPath();
+            ctx.moveTo(player.width / 2 - 10, 35);
+            ctx.lineTo(player.width / 2 + 10, 35);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.moveTo(player.width / 2 - 10, 40);
+            ctx.lineTo(player.width / 2 + 10, 40);
+            ctx.stroke();
+            
+            // 手臂
+            if (player.isJumping) {
+                // 跳跃时手臂上举
+                ctx.strokeRect(player.width / 2 - 22, 20, 7, 15);
+                ctx.strokeRect(player.width / 2 + 15, 20, 7, 15);
+            } else {
+                // 走路时手臂摆动
+                ctx.strokeRect(player.width / 2 - 22, 25 + Math.sin(player.frameCount * 0.2) * 5, 7, 15);
+                ctx.strokeRect(player.width / 2 + 15, 25 + Math.sin(player.frameCount * 0.2 + Math.PI) * 5, 7, 15);
+            }
+            
+            // 腿部
+            ctx.strokeRect(player.width / 2 - 12, 50, 8, 25 + bobbleOffset);
+            ctx.strokeRect(player.width / 2 + 4, 50, 8, 25 + Math.sin(player.frameCount * 0.2 + Math.PI) * 1);
+        }
+        
+        // 更新玩家状态
+        function updatePlayer(deltaTime) {
+            // 重力
+            player.velY += 0.7;
+            
+            // 水平移动
+            player.isMovingLeft = false;
+            player.isMovingRight = false;
+            
+            if (isMobile) {
+                // 手机控制
+                if (joystickActive) {
+                    const joystickX = Math.cos(joystickAngle);
+                    
+                    if (joystickX < -0.3) {
+                        player.x -= player.speed;
+                        player.isMovingLeft = true;
+                    } else if (joystickX > 0.3) {
+                        player.x += player.speed;
+                        player.isMovingRight = true;
+                    }
+                }
+            } else {
+                // 键盘控制
+                if (keys['ArrowLeft'] || keys['a']) {
+                    player.x -= player.speed;
+                    player.isMovingLeft = true;
+                }
+                
+                if (keys['ArrowRight'] || keys['d']) {
+                    player.x += player.speed;
+                    player.isMovingRight = true;
+                }
+            }
+            
+            // 应用垂直速度
+            player.y += player.velY;
+            
+            // 碰撞检测
+            let onGround = false;
+            
+            // 首先检查常规平台
+            for (let i = 0; i < platforms.length; i++) {
+                const platform = platforms[i];
+                
+                if (player.x < platform.x + platform.width &&
+                    player.x + player.width > platform.x &&
+                    player.y + player.height > platform.y &&
+                    player.y < platform.y + platform.height) {
+                    
+                    // 检查顶部碰撞
+                    if (player.velY > 0 && player.y + player.height < platform.y + platform.height/2) {
+                        player.y = platform.y - player.height;
+                        player.velY = 0;
+                        onGround = true;
+                    }
+                }
+            }
+            
+            // 然后检查特殊平台（比如藤蔓）
+            if (window.specialPlatforms) {
+                for (let i = 0; i < window.specialPlatforms.length; i++) {
+                    const platform = window.specialPlatforms[i];
+                    
+                    if (platform.platformCheck && platform.platformCheck(player)) {
+                        if (player.velY > 0) {
+                            player.velY = 0;
+                            onGround = true;
+                        }
+                    }
+                }
+            }
+            
+            // 检查跳板
+            for (let i = 0; i < jumpboards.length; i++) {
+                if (jumpboards[i].checkInteraction) {
+                    jumpboards[i].checkInteraction(player);
+                }
+            }
+            
+            // 检查危险区域（如尖刺、荆棘）
+            if (window.hazards) {
+                for (let i = 0; i < window.hazards.length; i++) {
+                    const hazard = window.hazards[i];
+                    if (hazard.checkHazard && hazard.checkHazard(player)) {
+                        // 危险区域处理已在checkHazard内完成
+                    }
+                }
+            }
+            
+            // 重置跳跃状态
+            if (onGround) {
+                player.isJumping = false;
+            }
+            
+            // 防止掉出世界
+            if (player.y > gameHeight * 2) {
+                player.y = gameHeight / 2;
+                player.velY = 0;
+            }
+            
+            // 更新帧动画计数器
+            player.frameCount++;
+            
+            // 检查单词交互
+            checkWordInteraction();
+        }
+        
+        // 更新相机位置
+        function updateCamera() {
+            // 水平跟随玩家
+            if (player.x < camera.leftEdge()) {
+                camera.x = player.x - (camera.width * 0.25);
+            } else if (player.x + player.width > camera.rightEdge()) {
+                camera.x = player.x + player.width - (camera.width * 0.75);
+            }
+            
+            // 垂直跟随玩家 - 允许地下探索
+            if (player.y < camera.topEdge()) {
+                camera.y = player.y - (camera.height * 0.25);
+            } else if (player.y + player.height > camera.bottomEdge()) {
+                camera.y = player.y + player.height - (camera.height * 0.75);
+            }
+            
+            // 限制相机不要移动到世界边界外
+            camera.x = Math.max(0, camera.x);
+            // 不再限制相机Y轴，允许地下探索
+            // camera.y = Math.max(0, camera.y);
+        }
+        
+        // 绘制游戏 - 修改后的版本，增加drawWordTexts函数调用
+        function drawGame() {
+            // 清除画布
+            ctx.clearRect(0, 0, gameWidth, gameHeight);
+            
+            // 先绘制静态背景
+            drawGameBackground(ctx);
+            
+            // 保存当前变换
+            ctx.save();
+            
+            // 应用相机变换
+            ctx.translate(-camera.x, -camera.y);
+            
+            // 绘制动态背景
+            for (let i = 0; i < backgrounds.length; i++) {
+                backgrounds[i].draw(ctx);
+            }
+            
+            // 绘制平台
+            for (let i = 0; i < platforms.length; i++) {
+                const platform = platforms[i];
+                
+                // 只绘制视野内的物体
+                if (platform.x + platform.width > camera.x && 
+                    platform.x < camera.x + camera.width &&
+                    platform.y + platform.height > camera.y && 
+                    platform.y < camera.y + camera.height) {
+                    
+                    if (platform.draw) {
+                        platform.draw(ctx);
+                    } else {
+                        ctx.fillStyle = platform.color || getSeasonColor('ground');
+                        ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+                    }
+                }
+            }
+            
+            // 绘制游戏对象
+            for (let i = 0; i < gameObjects.length; i++) {
+                const obj = gameObjects[i];
+                
+                // 只绘制视野内的物体
+                if (obj.x + (obj.width || 0) > camera.x && 
+                    obj.x < camera.x + camera.width &&
+                    obj.y + (obj.height || 0) > camera.y && 
+                    obj.y < camera.y + camera.height) {
+                    
+                    if (obj.draw) {
+                        obj.draw(ctx);
+                    } else if (obj.type === 'finish') {
+                        // 绘制终点旗帜
+                        ctx.fillStyle = '#ff5733';
+                        ctx.fillRect(obj.x, obj.y, obj.width, obj.height);
+                        
+                        ctx.fillStyle = 'white';
+                        for (let j = 0; j < 4; j++) {
+                            ctx.fillRect(obj.x, obj.y + j * 40, obj.width, 20);
+                        }
+                    }
+                }
+            }
+            
+            // 绘制特殊平台（比如藤蔓）和跳板
+            if (window.specialPlatforms) {
+                for (let i = 0; i < window.specialPlatforms.length; i++) {
+                    const platform = window.specialPlatforms[i];
+                    
+                    if (platform.draw && 
+                        platform.x + platform.width > camera.x && 
+                        platform.x < camera.x + camera.width &&
+                        platform.y + platform.height > camera.y && 
+                        platform.y < camera.y + camera.height) {
+                        
+                        platform.draw(ctx);
+                    }
+                }
+            }
+            
+            // 绘制玩家
+            drawPlayer(ctx);
+            
+            // 在最后绘制所有单词文本，确保它们显示在顶层
+            drawWordTexts(ctx);
+            
+            // 恢复变换
+            ctx.restore();
+        }
+        
+        // 更新游戏状态
+        function updateGame(deltaTime) {
+            // 更新玩家
+            updatePlayer(deltaTime);
+            
+            // 更新相机
+            updateCamera();
+            
+            // 更新游戏对象
+            for (let i = gameObjects.length - 1; i >= 0; i--) {
+                const obj = gameObjects[i];
+                
+                if (obj.update) {
+                    const active = obj.update();
+                    if (active === false) {
+                        gameObjects.splice(i, 1);
+                    }
+                }
+                
+                // 如果对象是动态的（如螃蟹），更新其行为
+                if (obj.updateBehavior) {
+                    obj.updateBehavior(deltaTime);
+                }
+            }
+            
+            // 更新环境效果
+            updateEnvironment(deltaTime);
+        }
+        
+        // 游戏循环
+        function gameLoop(timestamp) {
+            // 计算时间增量
+            const deltaTime = timestamp - lastTime;
+            lastTime = timestamp;
+            
+            // 更新游戏时间
+            gameTime += deltaTime;
+            
+            // 更新游戏状态
+            updateGame(deltaTime);
+            
+            // 绘制游戏
+            drawGame();
+            
+            // 如果音量图标是活跃的，更新它的位置
+            if (activeVolumeIcon) {
+                for (let i = 0; i < gameObjects.length; i++) {
+                    const obj = gameObjects[i];
+                    if (obj.word && obj.word.english === activeVolumeIcon.word) {
+                        // 放在单词旁边
+                        const iconX = obj.x - camera.x + obj.width + 20;
+                        const iconY = obj.y - camera.y;
+                        
+                        activeVolumeIcon.element.style.left = iconX + 'px';
+                        activeVolumeIcon.element.style.top = iconY + 'px';
+                        break;
+                    }
+                }
+            }
+            
+            // 如果提示按钮是活跃的，更新它的位置
+            if (activeHintButton) {
+                const obj = activeHintButton.wordObj;
+                const buttonX = obj.x - camera.x + obj.width / 2 - 20;
+                const buttonY = obj.y - camera.y - 50;
+                
+                activeHintButton.element.style.left = buttonX + 'px';
+                activeHintButton.element.style.top = buttonY + 'px';
+            }
+            
+            // 继续游戏循环
+            if (gameRunning && !gamePaused) {
+                animationId = requestAnimationFrame(gameLoop);
+            }
+        }
+        
+        // 初始化游戏
+        initGame();
+    </script>
+</body>
+</html>
