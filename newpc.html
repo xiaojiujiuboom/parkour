@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>英语单词跑酷游戏</title>
+    <title>单词跑酷</title>
     <style>
         body {
             margin: 0;
@@ -565,7 +565,7 @@
             <h1>单词跑酷</h1>
             <p>导入单词表开始游戏并选择角色</p>
             <p>表格示例：1️⃣英文 2️⃣中文 3️⃣词性</p>
-            <label for="fileInput" class="button">导入单词表 (Excel/CSV)</label>
+            <label for="fileInput" class="button">导入单词表 (Excel/CSV/Numbers)</label>
             <input type="file" id="fileInput" accept=".csv,.xlsx,.xls">
             
             <div id="characterSelect">
@@ -781,6 +781,10 @@
         const birds = [];
         // 鸭子数组
         const ducks = [];
+         // 鱼类数组 - 替代鸭子
+         const fishes = [];
+        // 池塘数组
+
         // 池塘数组
         const ponds = [];
         
@@ -1079,40 +1083,48 @@
         
         // 设置文件输入
         function setupFileInput() {
-            const fileInput = document.getElementById('fileInput');
-            fileInput.addEventListener('change', handleFileUpload);
-        }
+    const fileInput = document.getElementById('fileInput');
+    // 增加.numbers格式
+    fileInput.setAttribute('accept', '.csv,.xlsx,.xls,.numbers');
+    fileInput.addEventListener('change', handleFileUpload);
+}
         
         // 处理文件上传
         function handleFileUpload(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            const fileName = file.name.toLowerCase();
-            
-            document.getElementById('loading').style.display = 'flex';
-            let loadingProgress = 0;
-            const loadingInterval = setInterval(() => {
-                loadingProgress += 5;
-                document.getElementById('loadingFill').style.width = loadingProgress + '%';
-                if (loadingProgress >= 90) {
-                    clearInterval(loadingInterval);
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const fileName = file.name.toLowerCase();
+    
+    document.getElementById('loading').style.display = 'flex';
+    let loadingProgress = 0;
+    const loadingInterval = setInterval(() => {
+        loadingProgress += 5;
+        document.getElementById('loadingFill').style.width = loadingProgress + '%';
+        if (loadingProgress >= 90) {
+            clearInterval(loadingInterval);
+        }
+    }, 100);
+    
+    try {
+        if (fileName.endsWith('.csv')) {
+            // 处理CSV文件
+            Papa.parse(file, {
+                complete: function(results) {
+                    processWordData(results.data);
+                    finishLoading();
+                },
+                header: false,
+                error: function(error) {
+                    alert('CSV解析错误，请尝试Excel或CSV格式文档');
+                    document.getElementById('loading').style.display = 'none';
                 }
-            }, 100);
-            
-            if (fileName.endsWith('.csv')) {
-                // 处理CSV文件
-                Papa.parse(file, {
-                    complete: function(results) {
-                        processWordData(results.data);
-                        finishLoading();
-                    },
-                    header: false
-                });
-            } else if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) {
-                // 处理Excel文件
-                const reader = new FileReader();
-                reader.onload = function(e) {
+            });
+        } else if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls') || fileName.endsWith('.numbers')) {
+            // 处理Excel文件或Numbers文件
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, { type: 'array' });
                     const sheetName = workbook.SheetNames[0];
@@ -1120,13 +1132,25 @@
                     const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
                     processWordData(jsonData);
                     finishLoading();
-                };
-                reader.readAsArrayBuffer(file);
-            } else {
-                alert('请上传CSV或Excel文件！');
+                } catch (error) {
+                    alert('文件解析错误，请尝试Excel或CSV格式文档');
+                    document.getElementById('loading').style.display = 'none';
+                }
+            };
+            reader.onerror = function() {
+                alert('文件读取错误，请尝试Excel或CSV格式文档');
                 document.getElementById('loading').style.display = 'none';
-            }
+            };
+            reader.readAsArrayBuffer(file);
+        } else {
+            alert('请上传CSV、Excel或Numbers文件');
+            document.getElementById('loading').style.display = 'none';
         }
+    } catch (error) {
+        alert('文件处理错误，请尝试Excel或CSV格式文档');
+        document.getElementById('loading').style.display = 'none';
+    }
+}
         // 完成加载
         function finishLoading() {
             document.getElementById('loadingFill').style.width = '100%';
@@ -1317,6 +1341,7 @@
             jumpboards.length = 0;
             birds.length = 0; // 清空鸟类
             ducks.length = 0; // 清空鸭子
+            fishes.length = 0; // 替代ducks
             ponds.length = 0; // 清空池塘
             if (window.specialPlatforms) window.specialPlatforms.length = 0;
             if (window.hazards) window.hazards.length = 0;
@@ -1516,6 +1541,7 @@
         }
         
        // 创建池塘 - 修正鸭子的显示问题
+// 修改createPond函数，约在1950行左右
 function createPond(x, groundY) {
     const pondWidth = 350 + Math.random() * 150;
     const pondHeight = 30 + Math.random() * 20;
@@ -1527,6 +1553,7 @@ function createPond(x, groundY) {
         height: pondHeight,
         ducks: [],
         type: 'decoration',
+        fishes: [], // 这个池塘中的鱼
         draw: function(ctx) {
             // 绘制水面
             const gradient = ctx.createLinearGradient(this.x, this.y, this.x, this.y + this.height);
@@ -1569,32 +1596,51 @@ function createPond(x, groundY) {
             // 修正：确保池塘创建后立即创建鸭子
             if (this.ducks.length === 0) {
                 const duckCount = 1 + Math.floor(Math.random() * 3);
+                
+                // 计算安全区域，避免鸭子靠近边缘
+                const safeMargin = 60; // 增加边缘安全距离
+                const safeLeft = this.x + safeMargin;
+                const safeRight = this.x + this.width - safeMargin;
+                
                 for (let i = 0; i < duckCount; i++) {
-                    const duck = createDuck(
-                        this.x + Math.random() * (this.width - 40) + 20, 
-                        this.y - 10  // 确保鸭子在水面上
-                    );
+                    // 确保鸭子在安全区域内
+                    const duckX = safeLeft + Math.random() * (safeRight - safeLeft);
+                    const duck = createDuck(duckX, this.y - 10);
                     this.ducks.push(duck);
                 }
             }
             
-            // 如果鸭子离开了池塘范围，让它们转向而不是直接移除
+            // 如果鸭子离开了池塘安全区域，让它们转向
+            const safeMargin = 40; // 鸭子转向的边缘距离
             for (let i = 0; i < this.ducks.length; i++) {
                 const duck = this.ducks[i];
-                if (duck.x < this.x || duck.x > this.x + this.width) {
-                    duck.direction *= -1; // 改变方向
-                    duck.x += duck.direction * 5; // 稍微推回池塘区域
+                if (duck.x < this.x + safeMargin) {
+                    duck.direction = 1; // 向右移动
+                    duck.x = this.x + safeMargin; // 防止卡在边缘
+                } else if (duck.x > this.x + this.width - safeMargin) {
+                    duck.direction = -1; // 向左移动
+                    duck.x = this.x + this.width - safeMargin; // 防止卡在边缘
                 }
             }
         }
     };
     
     ponds.push(pond);
+    
+
+
+
+
     gameObjects.push(pond);
     
-    // 添加池塘边缘植物装饰
+    // 添加池塘边缘植物装饰 - 确保水草不会太靠近边缘
+    const safeMargin = 30; // 水草边缘安全距离
+    const plantableLeft = x + safeMargin;
+    const plantableRight = x + pondWidth - safeMargin;
+    
     for (let i = 0; i < 3; i++) {
-        const plantX = x + Math.random() * pondWidth;
+        // 确保植物在池塘的安全区域内
+        const plantX = plantableLeft + Math.random() * (plantableRight - plantableLeft);
         const plantY = groundY - 10;
         
         const plant = {
@@ -1646,12 +1692,171 @@ function createPond(x, groundY) {
         
         gameObjects.push(plant);
     }
+     // 随机添加1-3条鱼到池塘中
+     const fishCount = 1 + Math.floor(Math.random() * 3);
+    for (let i = 0; i < fishCount; i++) {
+        // 计算安全区域，避免鱼靠近边缘
+        const safeMargin = 40;
+        const safeLeft = pond.x + safeMargin;
+        const safeRight = pond.x + pond.width - safeMargin;
+        
+        // 确保鱼在安全区域内
+        const fishX = safeLeft + Math.random() * (safeRight - safeLeft);
+        // 让鱼在水中随机深度
+        const fishY = pond.y + 5 + Math.random() * pond.height * 0.7;
+        
+        const newFish = createFish(fishX, fishY);
+        pond.fishes.push(newFish);
+    }
     
     return pond;
 }
 
-        
+        // 创建鱼
+function createFish(x, y) {
+    // 随机大小和颜色
+    const fishSize = 10 + Math.random() * 15;
+    
+    // 随机方向
+    const direction = Math.random() > 0.5 ? 1 : -1;
+    
+    // 季节相关的鱼颜色
+    const fishColors = {
+        spring: ['#ff9e64', '#ffcf56', '#55c6ff'],
+        summer: ['#ff7b54', '#ffb26b', '#4d96ff'],
+        autumn: ['#bc6c25', '#dda15e', '#606c38'],
+        winter: ['#48cae4', '#90e0ef', '#ade8f4']
+    };
+    
+    const color = fishColors[currentSeason][Math.floor(Math.random() * fishColors[currentSeason].length)];
+    
+    const fish = {
+        x: x,
+        y: y,
+        width: fishSize * 2,
+        height: fishSize,
+        direction: direction, // 1代表向右，-1代表向左
+        speed: 0.5 + Math.random() * 0.5,
+        tailPhase: Math.random() * Math.PI * 2, // 尾巴摆动的初始相位
+        tailFrequency: 0.1 + Math.random() * 0.05, // 尾巴摆动的频率
+        color: color,
+        type: 'decoration',
+        originalY: y, // 保存原始Y坐标，用于上下浮动
+        update: function(deltaTime) {
+            // 移动鱼
+            this.x += this.direction * this.speed;
+            
+            // 上下浮动
+            this.y = this.originalY + Math.sin(gameTime * 0.001) * 5;
+            
+            // 更新尾巴摆动
+            this.tailPhase += this.tailFrequency;
+            
+            // 检查是否需要转向 - 为了简单起见，只在池塘边缘转向
+            // 找到这条鱼所在的池塘
+            for (let i = 0; i < ponds.length; i++) {
+                const pond = ponds[i];
+                
+                // 检查鱼是否在这个池塘中
+                if (pond.fishes.includes(this)) {
+                    // 设置安全边界
+                    const safeLeft = pond.x + 40;
+                    const safeRight = pond.x + pond.width - 40;
+                    
+                    // 如果鱼接近边缘，则转向
+                    if ((this.x < safeLeft && this.direction < 0) || 
+                        (this.x > safeRight && this.direction > 0)) {
+                        this.direction *= -1;
+                    }
+                    
+                    break;
+                }
+            }
+        },
+        draw: function(ctx) {
+            ctx.save();
+            
+            // 根据鱼的方向翻转
+            if (this.direction < 0) {
+                ctx.translate(this.x + this.width, this.y);
+                ctx.scale(-1, 1);
+                ctx.translate(-this.width, 0);
+            } else {
+                ctx.translate(this.x, this.y);
+            }
+            
+            // 鱼身体
+            ctx.fillStyle = this.color;
+            ctx.beginPath();
+            ctx.ellipse(this.width / 2, this.height / 2, this.width / 2 - 5, this.height / 2, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // 鱼尾
+            const tailWidth = this.width * 0.3;
+            const tailHeight = this.height * 0.8;
+            const tailX = 0;
+            const tailY = this.height / 2;
+            
+            // 尾巴摆动角度
+            const tailAngle = Math.sin(this.tailPhase) * 0.3;
+            
+            ctx.save();
+            ctx.translate(tailX, tailY);
+            ctx.rotate(tailAngle);
+            
+            // 绘制尾巴
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(-tailWidth / 2, -tailHeight / 2);
+            ctx.lineTo(-tailWidth, 0);
+            ctx.lineTo(-tailWidth / 2, tailHeight / 2);
+            ctx.closePath();
+            
+            ctx.fillStyle = adjustBrightness(this.color, 0.8);
+            ctx.fill();
+            
+            ctx.restore();
+            
+            // 鱼鳍
+            const finX = this.width / 2;
+            const finY = this.height / 2;
+            const finWidth = this.width * 0.2;
+            const finHeight = this.height * 0.4;
+            
+            // 上鳍
+            ctx.beginPath();
+            ctx.ellipse(finX, finY - finHeight / 2, finWidth / 2, finHeight / 2, Math.PI / 4, 0, Math.PI * 2);
+            ctx.fillStyle = adjustBrightness(this.color, 0.9);
+            ctx.fill();
+            
+            // 下鳍
+            ctx.beginPath();
+            ctx.ellipse(finX, finY + finHeight / 2, finWidth / 2, finHeight / 2, -Math.PI / 4, 0, Math.PI * 2);
+            ctx.fillStyle = adjustBrightness(this.color, 0.9);
+            ctx.fill();
+            
+            // 鱼眼
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(this.width * 0.7, this.height * 0.4, this.width * 0.08, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = 'black';
+            ctx.beginPath();
+            ctx.arc(this.width * 0.7, this.height * 0.4, this.width * 0.04, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.restore();
+        }
+    };
+    
+    gameObjects.push(fish);
+    fishes.push(fish);
+    
+    return fish;
+}
         // 创建鸭子 - 修正鸭子的移动和绘制
+// 修改createDuck函数，约在2013行左右
 function createDuck(x, y) {
     const duck = {
         x: x,
@@ -1681,6 +1886,9 @@ function createDuck(x, y) {
             // 保存当前状态
             ctx.save();
             
+            // 计算游泳效果的垂直偏移
+            const swimY = Math.sin(this.swimOffset) * 2;
+            
             // 如果向左移动，水平翻转
             if (this.direction < 0) {
                 ctx.translate(this.x + this.width, this.y);
@@ -1689,9 +1897,6 @@ function createDuck(x, y) {
             } else {
                 ctx.translate(this.x, this.y);
             }
-            
-            // 上下游动效果
-            const swimY = Math.sin(this.swimOffset) * 2;
             
             // 绘制鸭子身体
             ctx.fillStyle = this.color;
@@ -1806,97 +2011,122 @@ function createDuck(x, y) {
         }
         
   
-// 创建飞鸟 - 修正从左向右飞行，脑袋朝前
+// 创建鸟
 function createBird(x, y) {
+    // 随机大小和颜色
+    const birdSize = 12 + Math.random() * 8;
+    
+    // 季节相关的鸟颜色
+    const birdColors = {
+        spring: ['#ff5e5b', '#d65dc0', '#8a79fc'],
+        summer: ['#ff7700', '#ffaa00', '#43aa8b'],
+        autumn: ['#7f5539', '#9c6644', '#594a3c'],
+        winter: ['#48cae4', '#90e0ef', '#e0fbfc']
+    };
+    
+    const color = birdColors[currentSeason][Math.floor(Math.random() * birdColors[currentSeason].length)];
+    
     const bird = {
         x: x,
         y: y,
-        width: 30,
-        height: 20,
-        type: 'decoration',
-        speed: 2 + Math.random() * 2,
-        wingPhase: Math.random() * Math.PI * 2,
-        color: ['#795548', '#FF5722', '#3F51B5', '#009688'][Math.floor(Math.random() * 4)],
-        lifetime: Math.random() * 30000 + 15000, // 鸟的生命周期15-45秒
-        creationTime: gameTime, // 记录创建时间
+        width: birdSize * 2,
+        height: birdSize,
+        speedX: 1 + Math.random() * 2,
+        speedY: 0,
+        wingPhase: Math.random() * Math.PI * 2, // 翅膀拍打的初始相位
+        wingFrequency: 0.2 + Math.random() * 0.1, // 翅膀拍打的频率
+        color: color,
+        lifetime: 0,
+        changeDirectionTimer: 0,
         update: function(deltaTime) {
-            // 鸟现在从左向右飞行
-            this.x += this.speed;
+            // 增加生命时间
+            this.lifetime += deltaTime;
             
-            // 轻微上下飞行
-            this.y += Math.sin(gameTime * 0.001) * 0.5;
-            
-            // 检查生命周期是否结束或是否飞出屏幕很远
-            if ((gameTime - this.creationTime) > this.lifetime || 
-                this.x > camera.x + gameWidth + 500) {
-                // 返回false使游戏引擎知道要移除这只鸟
+            // 如果飞出很远，返回false表示移除
+            if (this.x > camera.x + gameWidth * 3 || this.x < camera.x - gameWidth * 2) {
                 return false;
             }
             
-            // 翅膀扇动
-            this.wingPhase += deltaTime * 0.01;
+            // 移动鸟
+            this.x += this.speedX;
+            this.y += this.speedY;
+            
+            // 更新翅膀拍打
+            this.wingPhase += this.wingFrequency;
+            
+            // 随机改变方向
+            this.changeDirectionTimer -= deltaTime;
+            if (this.changeDirectionTimer <= 0) {
+                // 随机设置新的Y方向速度
+                this.speedY = Math.random() * 2 - 1;
+                
+                // 重置计时器，1-3秒后再次改变
+                this.changeDirectionTimer = 1000 + Math.random() * 2000;
+            }
+            
+            // 防止飞得太高或太低
+            if (this.y < 50) {
+                this.speedY = Math.abs(this.speedY);
+            } else if (this.y > gameHeight - 100) {
+                this.speedY = -Math.abs(this.speedY);
+            }
+            
             return true;
         },
         draw: function(ctx) {
-            // 翅膀扇动的角度
-            const wingAngle = Math.sin(this.wingPhase) * 0.5;
-            
             ctx.save();
-            ctx.translate(this.x + this.width/2, this.y + this.height/2);
-            // 修正：不再水平翻转，因为现在鸟是向右飞的，头朝前
             
-            // 绘制鸟身体
+            ctx.translate(this.x, this.y);
+            
+            // 根据飞行方向轻微旋转
+            const angle = Math.atan2(this.speedY, this.speedX);
+            ctx.rotate(angle * 0.5);
+            
+            // 鸟身体
             ctx.fillStyle = this.color;
             ctx.beginPath();
-            ctx.ellipse(0, 0, this.width/2, this.height/3, 0, 0, Math.PI * 2);
+            ctx.ellipse(0, 0, this.width / 2, this.height / 2, 0, 0, Math.PI * 2);
             ctx.fill();
             
-            // 绘制鸟头 - 在身体右侧(正确方向)
+            // 鸟头
+            ctx.fillStyle = adjustBrightness(this.color, 1.1);
             ctx.beginPath();
-            ctx.arc(this.width/2 - 5, -2, 8, 0, Math.PI * 2);
+            ctx.arc(this.width / 3, -this.height / 4, this.width / 4, 0, Math.PI * 2);
             ctx.fill();
             
-            // 绘制鸟嘴 - 在头部右侧(正确方向)
-            ctx.fillStyle = '#FF9800';
+            // 鸟喙
+            ctx.fillStyle = '#ff9a00';
             ctx.beginPath();
-            ctx.moveTo(this.width/2 + 3, -2);
-            ctx.lineTo(this.width/2 + 10, 0);
-            ctx.lineTo(this.width/2 + 3, 2);
+            ctx.moveTo(this.width / 2, -this.height / 4);
+            ctx.lineTo(this.width / 2 + this.width / 5, -this.height / 8);
+            ctx.lineTo(this.width / 2, 0);
             ctx.closePath();
             ctx.fill();
             
-            // 绘制鸟眼睛 - 在头部右侧
+            // 鸟眼
             ctx.fillStyle = 'black';
             ctx.beginPath();
-            ctx.arc(this.width/2, -4, 1.5, 0, Math.PI * 2);
+            ctx.arc(this.width / 3 + this.width / 10, -this.height / 4 - this.height / 10, this.width / 15, 0, Math.PI * 2);
             ctx.fill();
             
-            // 绘制翅膀
-            ctx.fillStyle = adjustBrightness(this.color, 0.8);
+            // 翅膀 - 使用正弦函数使翅膀上下拍打
+            const wingY = Math.sin(this.wingPhase) * this.height / 2;
+            
+            // 翅膀收缩效果 - 当翅膀向上时收缩，向下时展开
+            const wingScale = 0.7 + Math.sin(this.wingPhase) * 0.3;
             
             // 上翅膀
-            ctx.save();
-            ctx.translate(-5, 0);
-            ctx.rotate(-wingAngle);
+            ctx.fillStyle = adjustBrightness(this.color, 0.8);
             ctx.beginPath();
-            ctx.ellipse(0, 0, 15, 6, 0, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.restore();
-            
-            // 下翅膀
-            ctx.save();
-            ctx.translate(-5, 0);
-            ctx.rotate(wingAngle);
-            ctx.beginPath();
-            ctx.ellipse(0, 0, 15, 6, 0, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.restore();
-            
-            // 绘制尾巴 - 在身体左侧(正确方向)
-            ctx.beginPath();
-            ctx.moveTo(-this.width/2, 0);
-            ctx.lineTo(-this.width/2 - 10, -5);
-            ctx.lineTo(-this.width/2 - 10, 5);
+            ctx.moveTo(0, 0);
+            ctx.quadraticCurveTo(
+                -this.width / 4, wingY - this.height / 2 * wingScale, 
+                -this.width / 2 * wingScale, wingY
+            );
+            ctx.quadraticCurveTo(
+                -this.width / 4, wingY + this.height / 4, 
+                0, 0
+            );
             ctx.closePath();
             ctx.fill();
             
@@ -1905,7 +2135,6 @@ function createBird(x, y) {
     };
     
     birds.push(bird);
-    gameObjects.push(bird);
     
     return bird;
 }
@@ -3360,9 +3589,12 @@ update: function(deltaTime) {
             }
             
             // 更新鸟类
-            for (let i = 0; i < birds.length; i++) {
+            for (let i = birds.length - 1; i >= 0; i--) {
                 if (birds[i].update) {
-                    birds[i].update(deltaTime);
+                    const isActive = birds[i].update(deltaTime);
+                    if (isActive === false) {
+                        birds.splice(i, 1);
+                    }
                 }
             }
             
@@ -4671,6 +4903,20 @@ if (birds.length < 3 && Math.random() < 0.3) { // 每帧有0.2%的概率生成�
                     }
                 }
             }
+                // 绘制鸟类
+            for (let i = 0; i < birds.length; i++) {
+                const bird = birds[i];
+                
+                if (bird.x + bird.width > camera.x && 
+                    bird.x < camera.x + camera.width &&
+                    bird.y + bird.height > camera.y && 
+                    bird.y < camera.y + camera.height) {
+                    
+                    if (bird.draw) {
+                        bird.draw(ctx);
+                    }
+                }
+            }
             
             // 绘制特殊平台（比如藤蔓）和跳板
             if (window.specialPlatforms) {
@@ -4739,6 +4985,7 @@ for (let i = gameObjects.length - 1; i >= 0; i--) {
             
             // 更新游戏状态
             updateGame(deltaTime);
+               updateDucks(deltaTime);
             
             // 绘制游戏
             drawGame();
@@ -4773,7 +5020,8 @@ for (let i = gameObjects.length - 1; i >= 0; i--) {
             if (gameRunning && !gamePaused) {
                 animationId = requestAnimationFrame(gameLoop);
             }
-            function updateDucks(deltaTime) {
+            // 在gameLoop函数末尾添加updateDucks函数
+function updateDucks(deltaTime) {
     // 更新鸭子
     for (let i = 0; i < ducks.length; i++) {
         if (ducks[i].update) {
@@ -4787,10 +5035,14 @@ for (let i = gameObjects.length - 1; i >= 0; i--) {
         
         // 检查池塘中的鸭子数量，如果太少就添加新的
         if (pond.ducks.length < 2 && Math.random() < 0.01) {
-            const newDuck = createDuck(
-                pond.x + Math.random() * (pond.width - 40) + 20,
-                pond.y - 10
-            );
+            // 计算安全区域，避免鸭子靠近边缘
+            const safeMargin = 60;
+            const safeLeft = pond.x + safeMargin;
+            const safeRight = pond.x + pond.width - safeMargin;
+            
+            // 确保鸭子在安全区域内
+            const duckX = safeLeft + Math.random() * (safeRight - safeLeft);
+            const newDuck = createDuck(duckX, pond.y - 10);
             pond.ducks.push(newDuck);
         }
     }
