@@ -510,6 +510,162 @@
                 overflow: hidden;
             }
         }
+
+        #tutorialScreen {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(30, 58, 138, 0.97) 0%, rgba(59, 130, 246, 0.97) 100%);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 150;
+    overflow-y: auto;
+}
+
+#tutorialContent {
+    width: 90%;
+    max-width: 800px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 30px;
+    color: white;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+#tutorialContent h2 {
+    font-size: 32px;
+    text-align: center;
+    margin-bottom: 30px;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.tutorial-section {
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.tutorial-section h3 {
+    font-size: 24px;
+    color: #22c55e;
+    margin-bottom: 15px;
+}
+
+.tutorial-section p {
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+
+.tutorial-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.tutorial-table th, .tutorial-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tutorial-table th {
+    background-color: rgba(0, 0, 0, 0.3);
+    color: #22c55e;
+}
+
+.character-showcase, .interaction-showcase {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.character-item, .interaction-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.2);
+    padding: 15px;
+    border-radius: 10px;
+    width: 120px;
+}
+
+.character-item p, .interaction-item p {
+    margin-top: 10px;
+    margin-bottom: 0;
+    text-align: center;
+}
+
+.interaction-item {
+    width: 150px;
+}
+
+.tutorial-section ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+.tutorial-section ul li {
+    padding: 8px 0;
+    position: relative;
+    padding-left: 25px;
+}
+
+.tutorial-section ul li:before {
+    content: "•";
+    color: #22c55e;
+    font-size: 24px;
+    position: absolute;
+    left: 5px;
+    top: 4px;
+}
+
+#closeTutorial {
+    display: block;
+    margin: 30px auto 10px;
+    padding: 15px 30px;
+    background-color: #22c55e;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+#closeTutorial:hover {
+    background-color: #16a34a;
+    transform: translateY(-2px);
+}
+
+/* 移动设备适配 */
+@media (max-width: 768px) {
+    #tutorialContent {
+        padding: 20px;
+    }
+    
+    #tutorialContent h2 {
+        font-size: 24px;
+    }
+    
+    .tutorial-section h3 {
+        font-size: 20px;
+    }
+    
+    .character-item, .interaction-item {
+        width: 100px;
+        padding: 10px;
+    }
+}
     </style>
 </head>
 <body>
@@ -608,7 +764,7 @@
                     </div>
                 </div>
             </div>
-            
+            <button id="tutorialButton" class="button">新手指南</button>
             <button id="startButton" class="button">开始游戏</button>
         </div>
         
@@ -639,6 +795,148 @@
         <div id="hintedWordsButton">已提示单词</div>
         
         <div id="rainbow"></div>
+        <div id="tutorialScreen" style="display: none;">
+            <div id="tutorialContent">
+                <h2>新手指南</h2>
+                <div class="tutorial-section">
+                    <h3>游戏目的</h3>
+                    <p>本项目为跑酷背单词，旨在帮助用户轻松记忆单词😉</p>
+                </div>
+                
+                <div class="tutorial-section">
+                    <h3>单词表导入说明</h3>
+                    <p>单词的中文或者英文会随机出现在物品上</p>
+                    <table class="tutorial-table">
+                        <tr>
+                            <th></th>
+            <th>英文</th>
+            <th>中文</th>
+            <th>词性</th>
+        </tr>
+        <tr>
+            <td>示例</td>
+            <td>apple</td>
+            <td>苹果 🍎</td>
+            <td>n</td>
+        </tr>
+    </table>
+</div>
+                
+                <div class="tutorial-section">
+                    <h3>角色选择</h3>
+                    <div class="character-showcase">
+                        <div class="character-item">
+                            <svg width="60" height="80" viewBox="0 0 50 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="25" cy="10" r="8" stroke="white" stroke-width="3"/>
+                                <line x1="25" y1="18" x2="25" y2="40" stroke="white" stroke-width="3"/>
+                                <line x1="25" y1="40" x2="15" y2="60" stroke="white" stroke-width="3"/>
+                                <line x1="25" y1="40" x2="35" y2="60" stroke="white" stroke-width="3"/>
+                                <line x1="25" y1="30" x2="10" y2="20" stroke="white" stroke-width="3"/>
+                                <line x1="25" y1="30" x2="40" y2="20" stroke="white" stroke-width="3"/>
+                            </svg>
+                            <p>火柴人</p>
+                        </div>
+                        <div class="character-item">
+                            <svg width="60" height="80" viewBox="0 0 50 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="25" cy="10" r="8" stroke="#4CAF50" stroke-width="3"/>
+                                <line x1="25" y1="18" x2="25" y2="40" stroke="#4CAF50" stroke-width="3"/>
+                                <line x1="25" y1="40" x2="15" y2="60" stroke="#4CAF50" stroke-width="3"/>
+                                <line x1="25" y1="40" x2="35" y2="60" stroke="#4CAF50" stroke-width="3"/>
+                                <line x1="25" y1="30" x2="10" y2="20" stroke="#4CAF50" stroke-width="3"/>
+                                <line x1="25" y1="30" x2="40" y2="20" stroke="#4CAF50" stroke-width="3"/>
+                                <path d="M15 10 H35" stroke="#4CAF50" stroke-width="3"/>
+                            </svg>
+                            <p>忍者</p>
+                        </div>
+                        <div class="character-item">
+                            <svg width="60" height="80" viewBox="0 0 50 70" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="15" y="5" width="20" height="15" rx="2" stroke="#f472b6" stroke-width="3"/>
+                                <rect x="10" y="20" width="30" height="25" rx="2" stroke="#f472b6" stroke-width="3"/>
+                                <line x1="20" y1="45" x2="20" y2="65" stroke="#f472b6" stroke-width="3"/>
+                                <line x1="30" y1="45" x2="30" y2="65" stroke="#f472b6" stroke-width="3"/>
+                                <circle cx="20" cy="12" r="3" fill="#f472b6"/>
+                                <circle cx="30" cy="12" r="3" fill="#f472b6"/>
+                                <line x1="18" y1="30" x2="32" y2="30" stroke="#f472b6" stroke-width="3"/>
+                            </svg>
+                            <p>机器人</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tutorial-section">
+                    <h3>游戏功能</h3>
+                    <ul>
+                        <li>点击【背诵模式】后经过物体将不再提示单词读音及释义，点击提示符号后方可查看</li>
+                        <li>提示后的单词会记录，可以在页面底部查看并导出，方便重复记忆</li>
+                        <li>游戏可以切换四季，并伴随白昼切换</li>
+                    </ul>
+                </div>
+                
+                <div class="tutorial-section">
+                    <h3>游戏交互</h3>
+                    <div class="interaction-showcase">
+                        <div class="interaction-item">
+                            <svg width="80" height="100" viewBox="0 0 60 100">
+                                <!-- 藤蔓 -->
+                                <path d="M30,10 Q20,30 30,50 Q40,70 30,90" stroke="#8BC34A" stroke-width="3" fill="none"/>
+                                <path d="M30,30 Q40,35 50,30" stroke="#8BC34A" stroke-width="2" fill="none"/>
+                                <path d="M30,50 Q20,55 10,50" stroke="#8BC34A" stroke-width="2" fill="none"/>
+                                <path d="M30,70 Q40,75 50,70" stroke="#8BC34A" stroke-width="2" fill="none"/>
+                            </svg>
+                            <p>藤蔓可攀爬</p>
+                        </div>
+                        <div class="interaction-item">
+                            <svg width="80" height="100" viewBox="0 0 60 100">
+                                <!-- 梯子 -->
+                                <line x1="15" y1="10" x2="15" y2="90" stroke="#8D6E63" stroke-width="3"/>
+                                <line x1="45" y1="10" x2="45" y2="90" stroke="#8D6E63" stroke-width="3"/>
+                                <line x1="15" y1="20" x2="45" y2="20" stroke="#8D6E63" stroke-width="2"/>
+                                <line x1="15" y1="40" x2="45" y2="40" stroke="#8D6E63" stroke-width="2"/>
+                                <line x1="15" y1="60" x2="45" y2="60" stroke="#8D6E63" stroke-width="2"/>
+                                <line x1="15" y1="80" x2="45" y2="80" stroke="#8D6E63" stroke-width="2"/>
+                            </svg>
+                            <p>梯子可攀爬</p>
+                        </div>
+                        <div class="interaction-item">
+                            <svg width="80" height="100" viewBox="0 0 60 100">
+                                <!-- 游戏中的螃蟹样式 -->
+                                <ellipse cx="30" cy="50" rx="15" ry="10" fill="#e63946" />
+                                <!-- 眼睛 -->
+                                <circle cx="38" cy="45" r="4" fill="white"/>
+                               <circle cx="45" cy="45" r="4" fill="white"/>
+                               <circle cx="38" cy="45" r="2" fill="black"/>
+                               <circle cx="45" cy="45" r="2" fill="black"/>
+                                
+                               <!-- 钳子 -->
+        <path d="M15,45 A8,8 0 1,0 15,55" stroke="#e63946" stroke-width="3" fill="none"/>
+        
+        <!-- 腿 -->
+        <line x1="25" y1="55" x2="20" y2="65" stroke="#e76f51" stroke-width="2"/>
+        <line x1="30" y1="55" x2="25" y2="65" stroke="#e76f51" stroke-width="2"/>
+        <line x1="35" y1="55" x2="40" y2="65" stroke="#e76f51" stroke-width="2"/>
+        <line x1="40" y1="55" x2="50" y2="65" stroke="#e76f51" stroke-width="2"/>
+                            </svg>
+                        
+                            <p>碰到螃蟹会被推走</p>
+                        </div>
+                        <div class="interaction-item">
+                            <svg width="80" height="100" viewBox="0 0 60 100">
+                                <!-- 荆棘 -->
+                                <rect x="10" y="70" width="40" height="10" fill="#3a5a40"/>
+                                <path d="M15,70 L10,50 L20,70" fill="#a61e4d"/>
+                                <path d="M25,70 L20,45 L30,70" fill="#a61e4d"/>
+                                <path d="M35,70 L30,50 L40,70" fill="#a61e4d"/>
+                                <path d="M45,70 L40,45 L50,70" fill="#a61e4d"/>
+                            </svg>
+                            <p>碰到荆棘会被弹开</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <button id="closeTutorial" class="button">开始游戏</button>
+            </div>
+        </div>
+
     </div>
 
     <!-- 使用Papa Parse处理CSV文件 -->
@@ -810,6 +1108,7 @@
             setupCharacterSelection();
             setupFileInput();
             setupStartButton();
+            setupTutorialButton();
             setupPauseButton();
             setupStudyModeToggle();
             setupSeasonToggle();
@@ -1230,6 +1529,20 @@
                 startGame();
             });
         }
+        // 设置新手指南按钮
+function setupTutorialButton() {
+    const tutorialButton = document.getElementById('tutorialButton');
+    const tutorialScreen = document.getElementById('tutorialScreen');
+    const closeTutorial = document.getElementById('closeTutorial');
+    
+    tutorialButton.addEventListener('click', () => {
+        tutorialScreen.style.display = 'flex';
+    });
+    
+    closeTutorial.addEventListener('click', () => {
+        tutorialScreen.style.display = 'none';
+    });
+}
         
         // 设置暂停按钮
         function setupPauseButton() {
@@ -1554,6 +1867,8 @@ function createPond(x, groundY) {
         ducks: [],
         type: 'decoration',
         fishes: [], // 这个池塘中的鱼
+        maxDucks: 2, // 设置最大鸭子数量
+        maxFishes: 2, // 设置最大鱼数量
         draw: function(ctx) {
             // 绘制水面
             const gradient = ctx.createLinearGradient(this.x, this.y, this.x, this.y + this.height);
@@ -1593,9 +1908,11 @@ function createPond(x, groundY) {
                 ctx.stroke();
             }
             
-            // 修正：确保池塘创建后立即创建鸭子
-            if (this.ducks.length === 0) {
-                const duckCount = 1 + Math.floor(Math.random() * 3);
+           // 确保池塘创建后立即创建鸭子，但不超过最大限制
+           if (this.ducks.length < this.maxDucks) {
+                // 计算需要添加的鸭子数量，最多添加到最大限制
+                const duckCount = Math.min(this.maxDucks - this.ducks.length, 
+                                          1 + Math.floor(Math.random()));
                 
                 // 计算安全区域，避免鸭子靠近边缘
                 const safeMargin = 60; // 增加边缘安全距离
@@ -1693,7 +2010,7 @@ function createPond(x, groundY) {
         gameObjects.push(plant);
     }
      // 随机添加1-3条鱼到池塘中
-     const fishCount = 1 + Math.floor(Math.random() * 3);
+     const fishCount = Math.min(pond.maxFishes, 1 + Math.floor(Math.random()));
     for (let i = 0; i < fishCount; i++) {
         // 计算安全区域，避免鱼靠近边缘
         const safeMargin = 40;
@@ -2748,207 +3065,228 @@ function createBird(x, y) {
         }
         
         // 创建隐藏坑 - 优化坑的设计
-        function createHiddenPit(x, groundY) {
-            // 创建坑的两侧边缘
-            const pitWidth = 120; // 更宽的坑
+        // 完全重写createHiddenPit函数
+// 完全重写createHiddenPit函数
+function createHiddenPit(x, groundY) {
+    // 创建坑的两侧边缘
+    const pitWidth = 120; // 更宽的坑
+    
+    // 左侧边缘
+    const leftEdge = {
+        x: x,
+        y: groundY,
+        width: 30, // 更宽的边缘
+        height: 60, // 更深的坑
+        type: 'platform',
+        color: getSeasonColor('ground'),
+        draw: function(ctx) {
+            // 绘制左侧边缘，和地形融合
+            const gradient = ctx.createLinearGradient(this.x, this.y, this.x + this.width, this.y);
+            gradient.addColorStop(0, getSeasonColor('ground'));
+            gradient.addColorStop(1, adjustBrightness(getSeasonColor('ground'), 0.9));
             
-            const leftEdge = {
-                x: x,
-                y: groundY,
-                width: 30, // 更宽的边缘
-                height: 60, // 更深的坑
-                type: 'platform',
-                color: getSeasonColor('ground'),
-                draw: function(ctx) {
-                    // 绘制左侧边缘，和地形融合
-                    const gradient = ctx.createLinearGradient(this.x, this.y, this.x + this.width, this.y);
-                    gradient.addColorStop(0, getSeasonColor('ground'));
-                    gradient.addColorStop(1, adjustBrightness(getSeasonColor('ground'), 0.9));
-                    
-                    ctx.fillStyle = gradient;
-                    ctx.fillRect(this.x, this.y, this.width, this.height);
-                    
-                    // 添加一些草或雪
-                    ctx.fillStyle = adjustBrightness(getSeasonColor('ground'), 1.1);
-                    for (let i = 0; i < 5; i++) {
-                        const grassHeight = 3 + Math.random() * 5;
-                        ctx.fillRect(this.x + Math.random() * this.width, this.y - grassHeight, 2, grassHeight);
-                    }
-                    
-                    // 添加一些指示性标志 - 如更暗的边缘
-                    ctx.strokeStyle = '#a61e4d';
-                    ctx.lineWidth = 2;
-                    ctx.beginPath();
-                    ctx.moveTo(this.x + this.width - 5, this.y - 5);
-                    ctx.lineTo(this.x + this.width, this.y);
-                    ctx.lineTo(this.x + this.width, this.y + 10);
-                    ctx.stroke();
+            ctx.fillStyle = gradient;
+            ctx.fillRect(this.x, this.y, this.width, this.height);
+            
+            // 添加一些草或雪
+            ctx.fillStyle = adjustBrightness(getSeasonColor('ground'), 1.1);
+            for (let i = 0; i < 5; i++) {
+                const grassHeight = 3 + Math.random() * 5;
+                ctx.fillRect(this.x + Math.random() * this.width, this.y - grassHeight, 2, grassHeight);
+            }
+            
+            // 添加一些指示性标志 - 如更暗的边缘
+            ctx.strokeStyle = '#a61e4d';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(this.x + this.width - 5, this.y - 5);
+            ctx.lineTo(this.x + this.width, this.y);
+            ctx.lineTo(this.x + this.width, this.y + 10);
+            ctx.stroke();
+        }
+    };
+    
+    // 右侧边缘
+    const rightEdge = {
+        x: x + pitWidth - 30,
+        y: groundY,
+        width: 30, // 更宽的边缘
+        height: 60, // 更深的坑
+        type: 'platform',
+        color: getSeasonColor('ground'),
+        draw: function(ctx) {
+            // 绘制右侧边缘，和地形融合
+            const gradient = ctx.createLinearGradient(this.x, this.y, this.x + this.width, this.y);
+            gradient.addColorStop(0, adjustBrightness(getSeasonColor('ground'), 0.9));
+            gradient.addColorStop(1, getSeasonColor('ground'));
+            
+            ctx.fillStyle = gradient;
+            ctx.fillRect(this.x, this.y, this.width, this.height);
+            
+            // 添加一些草或雪
+            ctx.fillStyle = adjustBrightness(getSeasonColor('ground'), 1.1);
+            for (let i = 0; i < 5; i++) {
+                const grassHeight = 3 + Math.random() * 5;
+                ctx.fillRect(this.x + Math.random() * this.width, this.y - grassHeight, 2, grassHeight);
+            }
+            
+            // 添加一些指示性标志 - 如更暗的边缘
+            ctx.strokeStyle = '#a61e4d';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(this.x + 5, this.y - 5);
+            ctx.lineTo(this.x, this.y);
+            ctx.lineTo(this.x, this.y + 10);
+            ctx.stroke();
+        }
+    };
+    
+    // 坑底 - 确保玩家能走过
+    const bottom = {
+        x: x + 30,
+        y: groundY + 60, // 坑底部
+        width: pitWidth - 60,
+        height: 20,
+        type: 'platform',
+        draw: function(ctx) {
+            ctx.fillStyle = adjustBrightness(getSeasonColor('ground'), 0.7);
+            ctx.fillRect(this.x, this.y, this.width, this.height);
+            
+            // 添加一些纹理
+            ctx.strokeStyle = adjustBrightness(getSeasonColor('ground'), 0.5);
+            ctx.lineWidth = 1;
+            for (let i = 0; i < this.width; i += 10) {
+                ctx.beginPath();
+                ctx.moveTo(this.x + i, this.y);
+                ctx.lineTo(this.x + i, this.y + 5);
+                ctx.stroke();
+            }
+        }
+    };
+    
+    // 在坑中间添加跳板，帮助玩家上来
+    const jumpboard = {
+        x: x + pitWidth/2 - 30,
+        y: groundY + 30, // 坑中间高度
+        type: 'jumpboard',
+        width: 60,
+        height: 20,
+        compressed: false,
+        animationTime: 0,
+        jumpMultiplier: 1.8,
+        draw: function(ctx) {
+            // 绘制一个视觉上明显的跳板
+            const boardColor = currentSeason === 'winter' ? '#B0BEC5' : '#8D6E63';
+            
+            const compressionAmount = this.compressed ? 
+                5 * (1 - Math.sin(this.animationTime * Math.PI)) : 0;
+            
+            // 底部支架
+            ctx.fillStyle = '#555';
+            ctx.fillRect(this.x + this.width/2 - 8, this.y + 15 + compressionAmount, 16, 5);
+            
+            // 弹簧
+            const springHeight = 8 - compressionAmount;
+            ctx.strokeStyle = '#FF6B6B';
+            ctx.lineWidth = 3;
+            
+            ctx.beginPath();
+            ctx.moveTo(this.x + this.width/2 - 5, this.y + 15 + compressionAmount);
+            ctx.lineTo(this.x + this.width/2 - 2, this.y + 12 + compressionAmount - springHeight/2);
+            ctx.lineTo(this.x + this.width/2 + 2, this.y + 18 + compressionAmount - springHeight);
+            ctx.lineTo(this.x + this.width/2 + 5, this.y + 15 + compressionAmount);
+            ctx.stroke();
+            
+            // 木板
+            ctx.fillStyle = boardColor;
+            const boardY = this.y - 3 + compressionAmount;
+            
+            ctx.beginPath();
+            ctx.moveTo(this.x, boardY + 5);
+            ctx.quadraticCurveTo(
+                this.x + this.width/2, boardY, 
+                this.x + this.width, boardY + 5
+            );
+            ctx.lineTo(this.x + this.width, boardY + 12);
+            ctx.quadraticCurveTo(
+                this.x + this.width/2, boardY + 18,
+                this.x, boardY + 12
+            );
+            ctx.closePath();
+            ctx.fill();
+            
+            // 木纹
+            ctx.strokeStyle = adjustBrightness(boardColor, 0.7);
+            ctx.lineWidth = 1;
+            for (let i = 0; i < 3; i++) {
+                const lineY = boardY + 5 + i * 3;
+                ctx.beginPath();
+                ctx.moveTo(this.x + 5, lineY);
+                ctx.quadraticCurveTo(
+                    this.x + this.width/2, lineY + (i % 2 === 0 ? 2 : -1),
+                    this.x + this.width - 5, lineY
+                );
+                ctx.stroke();
+            }
+        },
+        update: function(deltaTime) {
+            // 更新动画
+            if (this.compressed) {
+                this.animationTime += deltaTime * 0.01;
+                if (this.animationTime > 1) {
+                    this.compressed = false;
+                    this.animationTime = 0;
                 }
+            }
+            return true; // 始终返回true确保跳板不会被移除
+        },
+        checkInteraction: function(playerObj) {
+            if (playerObj.velY > 0 && 
+                playerObj.x + playerObj.width > this.x + 5 &&
+                playerObj.x < this.x + this.width - 5 &&
+                playerObj.y + playerObj.height > this.y - 5 &&
+                playerObj.y + playerObj.height < this.y + this.height/2) {
+                
+                this.compressed = true;
+                this.animationTime = 0;
+                
+                playerObj.velY = -playerObj.jumpForce * this.jumpMultiplier;
+                playerObj.isJumping = true;
+                
+                return true;
+            }
+            return false;
+        }
+    };
+    
+    // 关键部分：移除坑上方的ground平台
+    // 找到游戏中的地面平台
+    for (let i = 0; i < platforms.length; i++) {
+        const platform = platforms[i];
+        // 如果是主地面平台(最长的那个)
+        if (platform.width > gameWidth * 50) {
+            // 修改平台，在坑的位置挖一个洞
+            platform.draw = function(ctx) {
+                ctx.fillStyle = this.color || getSeasonColor('ground');
+                
+                // 绘制地面，但在坑的位置留空
+                ctx.fillRect(this.x, this.y, x - this.x, this.height); // 坑左边
+                ctx.fillRect(x + pitWidth, this.y, this.x + this.width - (x + pitWidth), this.height); // 坑右边
             };
-            
-            const rightEdge = {
-                x: x + pitWidth - 30,
-                y: groundY,
-                width: 30, // 更宽的边缘
-                height: 60, // 更深的坑
-                type: 'platform',
-                color: getSeasonColor('ground'),
-                draw: function(ctx) {
-                    // 绘制右侧边缘，和地形融合
-                    const gradient = ctx.createLinearGradient(this.x, this.y, this.x + this.width, this.y);
-                    gradient.addColorStop(0, adjustBrightness(getSeasonColor('ground'), 0.9));
-                    gradient.addColorStop(1, getSeasonColor('ground'));
-                    
-                    ctx.fillStyle = gradient;
-                    ctx.fillRect(this.x, this.y, this.width, this.height);
-                    
-                    // 添加一些草或雪
-                    ctx.fillStyle = adjustBrightness(getSeasonColor('ground'), 1.1);
-                    for (let i = 0; i < 5; i++) {
-                        const grassHeight = 3 + Math.random() * 5;
-                        ctx.fillRect(this.x + Math.random() * this.width, this.y - grassHeight, 2, grassHeight);
-                    }
-                    
-                    // 添加一些指示性标志 - 如更暗的边缘
-                    ctx.strokeStyle = '#a61e4d';
-                    ctx.lineWidth = 2;
-                    ctx.beginPath();
-                    ctx.moveTo(this.x + 5, this.y - 5);
-                    ctx.lineTo(this.x, this.y);
-                    ctx.lineTo(this.x, this.y + 10);
-                    ctx.stroke();
-                }
-            };
-            
-            // 坑底 - 确保玩家能走过
-            const bottom = {
-                x: x + 30,
-                y: groundY + 60, // 坑底部
-                width: pitWidth - 60,
-                height: 20,
-                type: 'platform',
-                draw: function(ctx) {
-                    ctx.fillStyle = adjustBrightness(getSeasonColor('ground'), 0.7);
-                    ctx.fillRect(this.x, this.y, this.width, this.height);
-                    
-                    // 添加一些纹理
-                    ctx.strokeStyle = adjustBrightness(getSeasonColor('ground'), 0.5);
-                    ctx.lineWidth = 1;
-                    for (let i = 0; i < this.width; i += 10) {
-                        ctx.beginPath();
-                        ctx.moveTo(this.x + i, this.y);
-                        ctx.lineTo(this.x + i, this.y + 5);
-                        ctx.stroke();
-                    }
-                }
-            };
-            
-            // 在坑中间添加跳板，帮助玩家上来
-            const jumpboard = {
-                x: x + pitWidth/2 - 30,
-                y: groundY + 30, // 坑中间高度
-                type: 'jumpboard',
-                width: 60,
-                height: 20,
-                compressed: false,
-                animationTime: 0,
-                jumpMultiplier: 1.8,
-                draw: function(ctx) {
-                    // 绘制一个视觉上明显的跳板
-                    const boardColor = currentSeason === 'winter' ? '#B0BEC5' : '#8D6E63';
-                    
-                    const compressionAmount = this.compressed ? 
-                        5 * (1 - Math.sin(this.animationTime * Math.PI)) : 0;
-                    
-                    // 底部支架
-                    ctx.fillStyle = '#555';
-                    ctx.fillRect(this.x + this.width/2 - 8, this.y + 15 + compressionAmount, 16, 5);
-                    
-                    // 弹簧
-                    const springHeight = 8 - compressionAmount;
-                    ctx.strokeStyle = '#FF6B6B';
-                    ctx.lineWidth = 3;
-                    
-                    ctx.beginPath();
-                    ctx.moveTo(this.x + this.width/2 - 5, this.y + 15 + compressionAmount);
-                    ctx.lineTo(this.x + this.width/2 - 2, this.y + 12 + compressionAmount - springHeight/2);
-                    ctx.lineTo(this.x + this.width/2 + 2, this.y + 18 + compressionAmount - springHeight);
-                    ctx.lineTo(this.x + this.width/2 + 5, this.y + 15 + compressionAmount);
-                    ctx.stroke();
-                    
-                    // 木板
-                    ctx.fillStyle = boardColor;
-                    const boardY = this.y - 3 + compressionAmount;
-                    
-                    ctx.beginPath();
-                    ctx.moveTo(this.x, boardY + 5);
-                    ctx.quadraticCurveTo(
-                        this.x + this.width/2, boardY, 
-                        this.x + this.width, boardY + 5
-                    );
-                    ctx.lineTo(this.x + this.width, boardY + 12);
-                    ctx.quadraticCurveTo(
-                        this.x + this.width/2, boardY + 18,
-                        this.x, boardY + 12
-                    );
-                    ctx.closePath();
-                    ctx.fill();
-                    
-                    // 木纹
-                    ctx.strokeStyle = adjustBrightness(boardColor, 0.7);
-                    ctx.lineWidth = 1;
-                    for (let i = 0; i < 3; i++) {
-                        const lineY = boardY + 5 + i * 3;
-                        ctx.beginPath();
-                        ctx.moveTo(this.x + 5, lineY);
-                        ctx.quadraticCurveTo(
-                            this.x + this.width/2, lineY + (i % 2 === 0 ? 2 : -1),
-                            this.x + this.width - 5, lineY
-                        );
-                        ctx.stroke();
-                    }
-                },
-                // 修改createJumpboard函数中的update方法
-update: function(deltaTime) {
-    // 更新动画
-    if (this.compressed) {
-        this.animationTime += deltaTime * 0.01;
-        if (this.animationTime > 1) {
-            this.compressed = false;
+            break;
         }
     }
-    return true; // 始终返回true确保跳板不会被移除
-},
-                checkInteraction: function(playerObj) {
-                    if (playerObj.velY > 0 && 
-                        playerObj.x + playerObj.width > this.x + 5 &&
-                        playerObj.x < this.x + this.width - 5 &&
-                        playerObj.y + playerObj.height > this.y - 5 &&
-                        playerObj.y + playerObj.height < this.y + this.height/2) {
-                        
-                        this.compressed = true;
-                        this.animationTime = 0;
-                        
-                        playerObj.velY = -playerObj.jumpForce * this.jumpMultiplier;
-                        playerObj.isJumping = true;
-                        
-                        return true;
-                    }
-                    return false;
-                }
-            };
-            
-        
-            
-            platforms.push(leftEdge);
-            platforms.push(rightEdge);
-            platforms.push(bottom);
-            gameObjects.push(leftEdge);
-            gameObjects.push(rightEdge);
-            gameObjects.push(bottom);
-            gameObjects.push(jumpboard);
-            jumpboards.push(jumpboard);
-        }
+    
+    // 添加所有元素到游戏中
+    platforms.push(leftEdge);
+    platforms.push(rightEdge);
+    platforms.push(bottom);
+    gameObjects.push(leftEdge);
+    gameObjects.push(rightEdge);
+    gameObjects.push(bottom);
+    gameObjects.push(jumpboard);
+    jumpboards.push(jumpboard);
+}
         
         // 创建隐藏洞 - 看起来像普通地形的洞
         function createHiddenHole(x, groundY, width) {
@@ -3104,109 +3442,112 @@ update: function(deltaTime) {
         }
         
         // 创建跳板 - 改进为不消失
-        function createJumpboard(x, y) {
-            const jumpboard = {
-                x: x,
-                y: y,
-                width: 60,
-                height: 20,
-                type: 'jumpboard',
-                compressed: false,
-                animationTime: 0,
-                jumpMultiplier: 1.8, // 跳板弹跳力是正常跳跃的1.8倍
-                checkInteraction: function(playerObj) {
-                    // 检查玩家是否踩到跳板
-                    if (playerObj.velY > 0 && // 玩家正在下落
-                        playerObj.x + playerObj.width > this.x + 5 &&
-                        playerObj.x < this.x + this.width - 5 &&
-                        playerObj.y + playerObj.height > this.y - 5 &&
-                        playerObj.y + playerObj.height < this.y + this.height/2) {
-                        
-                        // 压缩跳板
-                        this.compressed = true;
-                        this.animationTime = 0;
-                        
-                        // 玩家弹跳
-                        playerObj.velY = -playerObj.jumpForce * this.jumpMultiplier;
-                        playerObj.isJumping = true;
-                        
-                        return true;
-                    }
-                    return false;
-                },
-                update: function(deltaTime) {
-                    // 更新动画
-                    if (this.compressed) {
-                        this.animationTime += deltaTime * 0.01;
-                        if (this.animationTime > 1) {
-                            this.compressed = false;
-                        }
-                    }
-                },
-                draw: function(ctx) {
-                    // 根据当前季节绘制跳板
-                    const boardColor = currentSeason === 'winter' ? '#B0BEC5' : '#8D6E63'; // 冬季是浅灰色，其他季节是木色
-                    
-                    // 计算压缩状态
-                    const compressionAmount = this.compressed ? 
-                        5 * (1 - Math.sin(this.animationTime * Math.PI)) : 0;
-                    
-                    // 绘制底部支架（弹簧）
-                    ctx.fillStyle = '#555';
-                    ctx.fillRect(this.x + this.width/2 - 8, this.y + 15 + compressionAmount, 16, 5);
-                    
-                    // 绘制弹簧
-                    const springHeight = 8 - compressionAmount;
-                    ctx.strokeStyle = '#FF6B6B';
-                    ctx.lineWidth = 3;
-                    
-                    // 绘制弹簧的锯齿形状
-                    ctx.beginPath();
-                    ctx.moveTo(this.x + this.width/2 - 5, this.y + 15 + compressionAmount);
-                    ctx.lineTo(this.x + this.width/2 - 2, this.y + 12 + compressionAmount - springHeight/2);
-                    ctx.lineTo(this.x + this.width/2 + 2, this.y + 18 + compressionAmount - springHeight);
-                    ctx.lineTo(this.x + this.width/2 + 5, this.y + 15 + compressionAmount);
-                    ctx.stroke();
-                    
-                    // 绘制木板
-                    ctx.fillStyle = boardColor;
-                    // 绘制略微弯曲的木板
-                    const boardY = this.y - 3 + compressionAmount;
-                    
-                    ctx.beginPath();
-                    ctx.moveTo(this.x, boardY + 5);
-                    ctx.quadraticCurveTo(
-                        this.x + this.width/2, boardY, 
-                        this.x + this.width, boardY + 5
-                    );
-                    ctx.lineTo(this.x + this.width, boardY + 12);
-                    ctx.quadraticCurveTo(
-                        this.x + this.width/2, boardY + 18,
-                        this.x, boardY + 12
-                    );
-                    ctx.closePath();
-                    ctx.fill();
-                    
-                    // 绘制木纹
-                    ctx.strokeStyle = adjustBrightness(boardColor, 0.7);
-                    ctx.lineWidth = 1;
-                    for (let i = 0; i < 3; i++) {
-                        const lineY = boardY + 5 + i * 3;
-                        ctx.beginPath();
-                        ctx.moveTo(this.x + 5, lineY);
-                        ctx.quadraticCurveTo(
-                            this.x + this.width/2, lineY + (i % 2 === 0 ? 2 : -1),
-                            this.x + this.width - 5, lineY
-                        );
-                        ctx.stroke();
-                    }
+   // 修改createJumpboard函数
+function createJumpboard(x, y) {
+    const jumpboard = {
+        x: x,
+        y: y,
+        width: 60,
+        height: 20,
+        type: 'jumpboard',
+        compressed: false,
+        animationTime: 0,
+        jumpMultiplier: 1.4, // 跳板弹跳力是正常跳跃的1.4倍
+        lastJumpTime: 0, // 记录上次跳跃时间
+        checkInteraction: function(playerObj) {
+            // 改进的碰撞检测
+            if (playerObj.velY > 0 && // 玩家正在下落
+                playerObj.x + playerObj.width > this.x + 5 &&
+                playerObj.x < this.x + this.width - 5 &&
+                playerObj.y + playerObj.height >= this.y - 5 &&
+                playerObj.y + playerObj.height <= this.y + 10) {
+                
+                // 确保跳板每次都会压缩
+                this.compressed = true;
+                this.animationTime = 0;
+                this.lastJumpTime = gameTime;
+                
+                // 玩家弹跳
+                playerObj.velY = -playerObj.jumpForce * this.jumpMultiplier;
+                playerObj.isJumping = true;
+                
+                return true;
+            }
+            return false;
+        },
+        update: function(deltaTime) {
+            // 更新动画
+            if (this.compressed) {
+                this.animationTime += deltaTime * 0.01;
+                if (this.animationTime > 1) {
+                    this.compressed = false;
                 }
-            };
+            }
+            return true; // 确保跳板不会消失
+        },
+        draw: function(ctx) {
+            // 根据当前季节绘制跳板
+            const boardColor = currentSeason === 'winter' ? '#B0BEC5' : '#8D6E63'; // 冬季是浅灰色，其他季节是木色
             
-            jumpboards.push(jumpboard);
-            gameObjects.push(jumpboard);
+            // 计算压缩状态
+            const compressionAmount = this.compressed ? 
+                5 * (1 - Math.sin(this.animationTime * Math.PI)) : 0;
+            
+            // 绘制底部支架（弹簧）
+            ctx.fillStyle = '#555';
+            ctx.fillRect(this.x + this.width/2 - 8, this.y + 15 + compressionAmount, 16, 5);
+            
+            // 绘制弹簧
+            const springHeight = 8 - compressionAmount;
+            ctx.strokeStyle = '#FF6B6B';
+            ctx.lineWidth = 3;
+            
+            // 绘制弹簧的锯齿形状
+            ctx.beginPath();
+            ctx.moveTo(this.x + this.width/2 - 5, this.y + 15 + compressionAmount);
+            ctx.lineTo(this.x + this.width/2 - 2, this.y + 12 + compressionAmount - springHeight/2);
+            ctx.lineTo(this.x + this.width/2 + 2, this.y + 18 + compressionAmount - springHeight);
+            ctx.lineTo(this.x + this.width/2 + 5, this.y + 15 + compressionAmount);
+            ctx.stroke();
+            
+            // 绘制木板
+            ctx.fillStyle = boardColor;
+            // 绘制略微弯曲的木板
+            const boardY = this.y - 3 + compressionAmount;
+            
+            ctx.beginPath();
+            ctx.moveTo(this.x, boardY + 5);
+            ctx.quadraticCurveTo(
+                this.x + this.width/2, boardY, 
+                this.x + this.width, boardY + 5
+            );
+            ctx.lineTo(this.x + this.width, boardY + 12);
+            ctx.quadraticCurveTo(
+                this.x + this.width/2, boardY + 18,
+                this.x, boardY + 12
+            );
+            ctx.closePath();
+            ctx.fill();
+            
+            // 绘制木纹
+            ctx.strokeStyle = adjustBrightness(boardColor, 0.7);
+            ctx.lineWidth = 1;
+            for (let i = 0; i < 3; i++) {
+                const lineY = boardY + 5 + i * 3;
+                ctx.beginPath();
+                ctx.moveTo(this.x + 5, lineY);
+                ctx.quadraticCurveTo(
+                    this.x + this.width/2, lineY + (i % 2 === 0 ? 2 : -1),
+                    this.x + this.width - 5, lineY
+                );
+                ctx.stroke();
+            }
         }
-        
+    };
+    
+    jumpboards.push(jumpboard);
+    gameObjects.push(jumpboard);
+}
         // 创建荆棘
         function createThorns(x, y, width) {
             const thorns = {
@@ -3578,7 +3919,7 @@ update: function(deltaTime) {
             updateSpecialWeatherEffects(deltaTime);
             
             // 更新跳板 - 跳板不再消失
-            for (let i = 0; i < jumpboards.length; i++) {
+            for (let i = 0; i < jumpboards.length/2; i++) {
                 if (jumpboards[i].update) {
                     jumpboards[i].update(deltaTime);
                 }
@@ -3997,86 +4338,122 @@ if (birds.length < 3 && Math.random() < 0.3) { // 每帧有0.2%的概率生成�
         }
         
         // 绘制改进的山脉
-        function drawMountains(ctx) {
-            ctx.fillStyle = getSeasonColor('ground');
+        // 修改drawMountains函数
+// 修改drawMountains函数使用这些固定位置
+// 修改generateBackground函数
+function generateBackground() {
+    // 清空背景数组
+    backgrounds.length = 0;
+    mountainPositions.length = 0;
+    hillPositions.length = 0;
+    
+    // 初始化生成变量
+    farthestMountainGenerated = -3000;
+    farthestHillGenerated = -2000;
+    
+    // 只生成初始的一段山脉和小山丘
+    generateInitialMountains();
+    
+    // 添加背景绘制函数
+    backgrounds.push({
+        draw: function(ctx) {
+            drawEnvironment(ctx);
+        }
+    });
+}
+
+// 修改drawMountains函数，优化绘制逻辑
+function drawMountains(ctx) {
+    ctx.fillStyle = getSeasonColor('ground');
+    
+    // 绘制远景山脉 - 所有山脉数组中的山
+    for (const mountain of mountainPositions) {
+        // 使用较大的视距范围，但视差效果更小以避免抖动
+        if (mountain.x > camera.x - 2000 && mountain.x < camera.x + gameWidth + 2000) {
+            // 使用较小的视差系数，让山脉移动更平滑
+            const mountainX = mountain.x - camera.x * 0.3; // 视差效果
+            const baseHeight = mountain.height;
+            const seed = mountain.seed;
             
-            // 绘制远景山脉
-            for (let i = 0; i < 6; i++) {
-                const mountainX = (i * 600) - (camera.x * 0.4) % 3600;
-                const baseHeight = 80 + Math.sin(i * 0.7) * 40;
+            // 绘制山脉形状
+            ctx.beginPath();
+            ctx.moveTo(mountainX - 150, gameHeight - 50);
+            
+            const leftHeight = baseHeight * (0.6 + seed * 0.3);
+            const topHeight = baseHeight;
+            const rightHeight = baseHeight * (0.5 + (1-seed) * 0.4);
+            
+            ctx.bezierCurveTo(
+                mountainX - 50, gameHeight - 50 - leftHeight * 0.8,
+                mountainX + 30, gameHeight - 50 - leftHeight,
+                mountainX + 100, gameHeight - 50 - topHeight
+            );
+            
+            ctx.lineTo(mountainX + 100, gameHeight - 50 - topHeight);
+            
+            ctx.bezierCurveTo(
+                mountainX + 170, gameHeight - 50 - rightHeight,
+                mountainX + 250, gameHeight - 50 - rightHeight * 0.5,
+                mountainX + 350, gameHeight - 50
+            );
+            
+            ctx.closePath();
+            ctx.fill();
+            
+            // 添加山上的雪（冬季）
+            if (currentSeason === 'winter' || 
+                (seasonChangeStarted && nextSeason === 'winter' && seasonTransition > 0.5)) {
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
                 
-                // 绘制曲线山脉而不是简单的三角形
                 ctx.beginPath();
-                ctx.moveTo(mountainX - 100, gameHeight - 50);
-                
-                // 左侧山坡
+                ctx.moveTo(mountainX + 40, gameHeight - 50 - topHeight * 0.7);
                 ctx.bezierCurveTo(
-                    mountainX - 50, gameHeight - 50 - baseHeight * 0.5,
-                    mountainX + 50, gameHeight - 50 - baseHeight * 0.8,
-                    mountainX + 100, gameHeight - 50 - baseHeight
+                    mountainX + 70, gameHeight - 50 - topHeight * 0.9,
+                    mountainX + 130, gameHeight - 50 - topHeight * 0.9,
+                    mountainX + 160, gameHeight - 50 - topHeight * 0.7
                 );
-                
-                // 山顶
-                ctx.lineTo(mountainX + 100, gameHeight - 50 - baseHeight);
-                
-                // 右侧山坡
-                ctx.bezierCurveTo(
-                    mountainX + 150, gameHeight - 50 - baseHeight * 0.8,
-                    mountainX + 250, gameHeight - 50 - baseHeight * 0.3,
-                    mountainX + 300, gameHeight - 50
-                );
-                
+                ctx.lineTo(mountainX + 100, gameHeight - 50 - topHeight);
                 ctx.closePath();
                 ctx.fill();
                 
-                // 添加山上的雪（冬季）
-                if (currentSeason === 'winter' || 
-                    (seasonChangeStarted && nextSeason === 'winter' && seasonTransition > 0.5)) {
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-                    
-                    ctx.beginPath();
-                    ctx.moveTo(mountainX + 40, gameHeight - 50 - baseHeight * 0.7);
-                    ctx.bezierCurveTo(
-                        mountainX + 70, gameHeight - 50 - baseHeight * 0.9,
-                        mountainX + 130, gameHeight - 50 - baseHeight * 0.9,
-                        mountainX + 160, gameHeight - 50 - baseHeight * 0.7
-                    );
-                    ctx.lineTo(mountainX + 100, gameHeight - 50 - baseHeight);
-                    ctx.closePath();
-                    ctx.fill();
-                    
-                    ctx.fillStyle = getSeasonColor('ground');
-                }
-            }
-            
-            // 绘制近景小山丘
-            for (let i = 0; i < 10; i++) {
-                const hillX = (i * 300) - (camera.x * 0.7) % 3000;
-                const hillHeight = 40 + Math.sin(i * 1.3) * 20;
-                
-                ctx.fillStyle = adjustBrightness(getSeasonColor('ground'), 1.1); // 稍微亮一点
-                
-                ctx.beginPath();
-                ctx.moveTo(hillX - 50, gameHeight - 50);
-                
-                // 曲线小山丘
-                ctx.bezierCurveTo(
-                    hillX, gameHeight - 50 - hillHeight * 0.7,
-                    hillX + 50, gameHeight - 50 - hillHeight,
-                    hillX + 100, gameHeight - 50 - hillHeight * 0.8
-                );
-                
-                ctx.bezierCurveTo(
-                    hillX + 150, gameHeight - 50 - hillHeight * 0.6,
-                    hillX + 200, gameHeight - 50 - hillHeight * 0.3,
-                    hillX + 250, gameHeight - 50
-                );
-                
-                ctx.closePath();
-                ctx.fill();
+                ctx.fillStyle = getSeasonColor('ground');
             }
         }
-        
+    }
+    
+    // 绘制近景小山丘
+    for (const hill of hillPositions) {
+        if (hill.x > camera.x - 1000 && hill.x < camera.x + gameWidth + 1000) {
+            const hillX = hill.x - camera.x * 0.6; // 视差效果
+            const hillHeight = hill.height;
+            const seed = hill.seed;
+            
+            ctx.fillStyle = adjustBrightness(getSeasonColor('ground'), 1.1);
+            
+            ctx.beginPath();
+            ctx.moveTo(hillX - 80, gameHeight - 50);
+            
+            const leftHeight = hillHeight * (0.7 + seed * 0.3);
+            const topHeight = hillHeight;
+            const rightHeight = hillHeight * (0.6 + (1-seed) * 0.4);
+            
+            ctx.bezierCurveTo(
+                hillX - 20, gameHeight - 50 - leftHeight * 0.8,
+                hillX + 30, gameHeight - 50 - topHeight,
+                hillX + 80, gameHeight - 50 - rightHeight
+            );
+            
+            ctx.bezierCurveTo(
+                hillX + 130, gameHeight - 50 - rightHeight * 0.7,
+                hillX + 180, gameHeight - 50 - rightHeight * 0.3,
+                hillX + 230, gameHeight - 50
+            );
+            
+            ctx.closePath();
+            ctx.fill();
+        }
+    }
+}
         // 调整颜色亮度
         function adjustBrightness(color, factor) {
             if (color.startsWith('#')) {
@@ -4221,18 +4598,160 @@ if (birds.length < 3 && Math.random() < 0.3) { // 每帧有0.2%的概率生成�
                 ctx.fillRect(fogX - 300, fogY - 300, 600, 600);
             }
         }
-        
+        // 添加这个全局变量数组用于存储山脉位置
+const mountainPositions = [];
+const hillPositions = [];
+let farthestMountainGenerated = -3000; // 已生成的最远山脉位置
+let farthestHillGenerated = -2000;     // 已生成的最远小山丘位置
         // 生成背景 - 现在由drawGameBackground和drawEnvironment分开处理
+        // 修改generateBackground函数
         function generateBackground() {
-            // 动态背景将通过drawEnvironment函数绘制
-            backgrounds.length = 0; // 清空原有背景
-            
-            backgrounds.push({
-                draw: function(ctx) {
-                    drawEnvironment(ctx);
-                }
+    // 清空背景数组
+    backgrounds.length = 0;
+    mountainPositions.length = 0;
+    hillPositions.length = 0;
+    
+    // 初始化生成变量
+    farthestMountainGenerated = -3000;
+    farthestHillGenerated = -2000;
+    
+    // 只生成初始的一段山脉和小山丘
+    generateInitialMountains();
+    
+    // 添加背景绘制函数
+    backgrounds.push({
+        draw: function(ctx) {
+            drawEnvironment(ctx);
+        }
+    });
+}
+// 新增函数：生成初始的山脉和小山丘
+function generateInitialMountains() {
+    // 生成初始屏幕和前方较远距离的山脉
+    const initialDistance = gameWidth * 10; // 生成初始屏幕宽度的10倍
+    
+    // 生成远处的山脉
+    let mountainX = -10000; // 从远处屏幕外开始
+    while (mountainX < initialDistance) {
+        if (Math.random() > 0.4) { // 60%几率生成山脉
+            mountainPositions.push({
+                x: mountainX,
+                height: 60 + Math.random() * 60,
+                seed: Math.random() // 保存随机种子用于形状
             });
         }
+        mountainX += 600 + Math.random() * 800;
+    }
+    
+    farthestMountainGenerated = mountainX;
+    
+    // 生成小山丘
+    let hillX = -20000;
+    while (hillX < initialDistance) {
+        if (Math.random() > 0.3) { // 70%几率生成小山丘
+            hillPositions.push({
+                x: hillX,
+                height: 30 + Math.random() * 25,
+                seed: Math.random()
+            });
+        }
+        hillX += 300 + Math.random() * 400;
+    }
+    
+    farthestHillGenerated = hillX;
+}
+
+      // 新增函数：根据玩家位置检查并生成山脉
+function checkAndGenerateMountains() {
+    // 计算玩家距离右边屏幕边缘的距离
+    const playerDistanceToRightEdge = (camera.x + gameWidth) - (player.x + player.width);
+    
+    // 如果玩家距离右边缘足够近（gameWidth的一半），生成更多山脉
+    if (playerDistanceToRightEdge < gameWidth * 0.5) {
+        // 为远处的山脉生成更多
+        generateMoreMountains();
+        
+        // 为近处的小山丘生成更多
+        generateMoreHills();
+    }
+    
+    // 内存优化：清理远处的山脉
+    cleanUpDistantMountains();
+}
+
+// 新增函数：生成更多远处山脉
+function generateMoreMountains() {
+    // 计算需要生成到的位置 - 玩家视点前方一段距离
+    const targetX = camera.x + gameWidth * 3; 
+    
+    // 只在需要时生成新的山脉
+    if (farthestMountainGenerated < targetX) {
+        // 从上次生成位置继续
+        let mountainX = farthestMountainGenerated;
+        
+        // 一直生成到目标位置
+        while (mountainX < targetX) {
+            if (Math.random() > 0.4) { // 60%几率生成山脉
+                mountainPositions.push({
+                    x: mountainX,
+                    height: 60 + Math.random() * 60,
+                    seed: Math.random()
+                });
+            }
+            mountainX += 600 + Math.random() * 800; // 山脉间距
+        }
+        
+        // 更新最远生成位置
+        farthestMountainGenerated = mountainX;
+    }
+}
+
+// 新增函数：生成更多近处小山丘
+function generateMoreHills() {
+    // 计算需要生成到的位置 - 玩家视点前方一段距离
+    const targetX = camera.x + gameWidth * 3;
+    
+    // 只在需要时生成新的小山丘
+    if (farthestHillGenerated < targetX) {
+        // 从上次生成位置继续
+        let hillX = farthestHillGenerated;
+        
+        // 一直生成到目标位置
+        while (hillX < targetX) {
+            if (Math.random() > 0.3) { // 70%几率生成小山丘
+                hillPositions.push({
+                    x: hillX,
+                    height: 30 + Math.random() * 25,
+                    seed: Math.random()
+                });
+            }
+            hillX += 300 + Math.random() * 400; // 小山丘间距
+        }
+        
+        // 更新最远生成位置
+        farthestHillGenerated = hillX;
+    }
+}
+
+// 新增函数：清理远处山脉
+function cleanUpDistantMountains() {
+    // 只有当山脉数量超过一定阈值才清理
+    if (mountainPositions.length > 300) {
+        const cleanupDistance = camera.x - gameWidth * 10; // 非常远的距离才清理
+        
+        // 移除远处的山脉
+        mountainPositions = mountainPositions.filter(mountain => mountain.x > cleanupDistance);
+    }
+    
+    // 同样清理小山丘
+    if (hillPositions.length > 400) {
+        const cleanupDistance = camera.x - gameWidth * 8; // 非常远的距离才清理
+        
+        // 移除远处的小山丘
+        hillPositions = hillPositions.filter(hill => hill.x > cleanupDistance);
+    }
+}
+
         
         // 更新进度条
         function updateProgressBar() {
@@ -4698,13 +5217,15 @@ if (birds.length < 3 && Math.random() < 0.3) { // 每帧有0.2%的概率生成�
             // 水平移动
             player.isMovingLeft = false;
             player.isMovingRight = false;
+            // 添加这个判断：如果玩家在起始位置附近，禁止向左移动
+            const isNearStart = player.x < 20;
             
             if (isMobile) {
                 // 手机控制
                 if (joystickActive) {
                     const joystickX = Math.cos(joystickAngle);
                     
-                    if (joystickX < -0.3) {
+                    if (joystickX < -0.3 && !isNearStart) {
                         player.x -= player.speed;
                         player.isMovingLeft = true;
                     } else if (joystickX > 0.3) {
@@ -4714,7 +5235,7 @@ if (birds.length < 3 && Math.random() < 0.3) { // 每帧有0.2%的概率生成�
                 }
             } else {
                 // 键盘控制
-                if (keys['ArrowLeft'] || keys['a']) {
+                if ((keys['ArrowLeft'] || keys['a']) && !isNearStart) {
                     player.x -= player.speed;
                     player.isMovingLeft = true;
                 }
@@ -4951,13 +5472,14 @@ if (birds.length < 3 && Math.random() < 0.3) { // 每帧有0.2%的概率生成�
             
             // 更新相机
             updateCamera();
-            
+            // 检查并生成山脉
+            checkAndGenerateMountains();
           // 更新游戏对象
 for (let i = gameObjects.length - 1; i >= 0; i--) {
     const obj = gameObjects[i];
     
     if (obj.update) {
-        const active = obj.update();
+        const active = obj.update(deltaTime);
         // 只有当active明确为false且对象不是跳板时才移除
         if (active === false && obj.type !== 'jumpboard') {
             gameObjects.splice(i, 1);
@@ -5032,9 +5554,28 @@ function updateDucks(deltaTime) {
     // 更新池塘
     for (let i = 0; i < ponds.length; i++) {
         const pond = ponds[i];
-        
+        // 移除无效的鸭子，如超出屏幕太远的鸭子
+        for (let j = pond.ducks.length - 1; j >= 0; j--) {
+            const duck = pond.ducks[j];
+            // 如果鸭子离池塘太远，移除它
+            if (Math.abs(duck.x - (pond.x + pond.width/2)) > pond.width * 1.5) {
+                // 从游戏对象和鸭子数组中移除
+                const gameObjIndex = gameObjects.indexOf(duck);
+                if (gameObjIndex !== -1) {
+                    gameObjects.splice(gameObjIndex, 1);
+                }
+                
+                const ducksIndex = ducks.indexOf(duck);
+                if (ducksIndex !== -1) {
+                    ducks.splice(ducksIndex, 1);
+                }
+                
+                // 从池塘的鸭子数组中移除
+                pond.ducks.splice(j, 1);
+            }
+        }
         // 检查池塘中的鸭子数量，如果太少就添加新的
-        if (pond.ducks.length < 2 && Math.random() < 0.01) {
+        if (pond.ducks.length < pond.maxDucks && Math.random() < 0.005) {
             // 计算安全区域，避免鸭子靠近边缘
             const safeMargin = 60;
             const safeLeft = pond.x + safeMargin;
